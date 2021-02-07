@@ -17,8 +17,14 @@
  */
 
 #include "COM_ScaleOperation.h"
+<<<<<<< HEAD
 #include "COM_ComputeKernel.h"
 #include "COM_GlobalManager.h"
+=======
+#include "COM_GlobalManager.h"
+
+#include "COM_ComputeKernel.h"
+>>>>>>> upstream/compositor-up
 #include "COM_kernel_cpu.h"
 
 #define OPENCL_CODE

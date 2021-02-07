@@ -20,6 +20,10 @@
 #include "COM_ComputeKernel.h"
 #include "COM_ExecutionManager.h"
 #include "COM_GlobalManager.h"
+<<<<<<< HEAD
+=======
+
+>>>>>>> upstream/compositor-up
 #include "COM_kernel_cpu.h"
 
 using namespace std::placeholders;
@@ -43,7 +47,15 @@ void DirectionalBlurOperation::initExecution()
   const float height = getHeight();
 
   const float a = angle;
+<<<<<<< HEAD
   const float iterations = powf(2.0f, (float)user_iterations);
+=======
+
+  // OLD USAGE: Changed to allow finer control to the user
+  // const float iterations = powf(2.0f, (float)user_iterations);
+
+  const float iterations = user_iterations;
+>>>>>>> upstream/compositor-up
   const float itsc = 1.0f / iterations;
 
   this->m_iterations = iterations;

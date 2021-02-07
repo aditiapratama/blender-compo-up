@@ -75,7 +75,7 @@ class NodeOperationBuilder {
   typedef std::map<NodeInput *, OpInputs> OpInputInverseMap;
 
  private:
-  const CompositorContext *m_context;
+  CompositorContext *m_context;
   NodeGraph m_graph;
 
   Operations m_operations;
@@ -101,7 +101,7 @@ class NodeOperationBuilder {
   NodeOperationBuilder(ExecutionSystem &sys, bNodeTree *b_nodetree);
   ~NodeOperationBuilder();
 
-  const CompositorContext &context() const
+  CompositorContext &context()
   {
     return *m_context;
   }
@@ -159,14 +159,23 @@ class NodeOperationBuilder {
   void prune_operations();
 
   /** Sort operations by link dependencies */
+<<<<<<< HEAD
   //void sort_operations();
+=======
+  // void sort_operations();
+>>>>>>> upstream/compositor-up
 
   /** Create execution groups */
   void group_operations();
   ExecutionGroup *make_group(NodeOperation *op);
 
  private:
+<<<<<<< HEAD
   void find_reachable_operations_recursive(std::set<NodeOperation*> &reachable, NodeOperation *op);
+=======
+  void find_reachable_operations_recursive(std::set<NodeOperation *> &reachable,
+                                           NodeOperation *op);
+>>>>>>> upstream/compositor-up
   Links getOutputLinks(NodeOperationOutput *output);
   NodeOperation *getCompositorOutput();
   std::vector<NodeOperation *> getNonViewNonCompositorOutputs();

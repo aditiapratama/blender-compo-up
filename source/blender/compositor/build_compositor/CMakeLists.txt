@@ -23,8 +23,11 @@ get_filename_component(CMP_BASE ${CMAKE_CURRENT_SOURCE_DIR}/.. ABSOLUTE)
 set(CMP_NODES ${CMP_BASE}/nodes)
 set(CMP_OPS ${CMP_BASE}/operations)
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> upstream/compositor-up
 set(INC
   ${CMP_BASE}
   ${CMP_BASE}/buffering
@@ -44,6 +47,10 @@ set(INC
   ${CMP_NODES}/matte
   ${CMP_NODES}/distort
   ${CMP_NODES}/layout
+<<<<<<< HEAD
+=======
+  ${CMP_NODES}/experimental
+>>>>>>> upstream/compositor-up
 
   ${CMP_OPS}
   ${CMP_OPS}/input
@@ -54,12 +61,24 @@ set(INC
   ${CMP_OPS}/vector
   ${CMP_OPS}/matte
   ${CMP_OPS}/distort
+<<<<<<< HEAD
+=======
+  ${CMP_OPS}/experimental
+>>>>>>> upstream/compositor-up
 
   ${CMP_BASE}/../blenkernel
   ${CMP_BASE}/../blenlib
   ${CMP_BASE}/../blentranslation
+<<<<<<< HEAD
   ${CMP_BASE}/../depsgraph
   ${CMP_BASE}/../imbuf
+=======
+  ${CMP_BASE}/../sequencer
+  ${CMP_BASE}/../depsgraph
+  ${CMP_BASE}/../imbuf
+  ${CMP_BASE}/../draw
+  ${CMP_BASE}/../gpu
+>>>>>>> upstream/compositor-up
   ${CMP_BASE}/../makesdna
   ${CMP_BASE}/../makesrna
   ${CMP_BASE}/../nodes
@@ -146,8 +165,11 @@ set(SRC
   # util
   ${CMP_BASE}/util/COM_BaseConverter.cpp
   ${CMP_BASE}/util/COM_BaseConverter.h
+<<<<<<< HEAD
   ${CMP_BASE}/util/COM_Bmp.cpp
   ${CMP_BASE}/util/COM_Bmp.h
+=======
+>>>>>>> upstream/compositor-up
   ${CMP_BASE}/util/COM_PixelsUtil.cpp
   ${CMP_BASE}/util/COM_PixelsUtil.h
   ${CMP_BASE}/util/COM_RectUtil.cpp
@@ -156,6 +178,11 @@ set(SRC
   ${CMP_BASE}/util/COM_MathUtil.h
   ${CMP_BASE}/util/COM_TimeUtil.cpp
   ${CMP_BASE}/util/COM_TimeUtil.h
+<<<<<<< HEAD
+=======
+  ${CMP_BASE}/util/COM_Renderer.cpp
+  ${CMP_BASE}/util/COM_Renderer.h
+>>>>>>> upstream/compositor-up
   ${CMP_BASE}/util/COM_StringUtil.cpp
   ${CMP_BASE}/util/COM_StringUtil.h
   ${CMP_BASE}/util/COM_BufferUtil.cpp
@@ -224,6 +251,11 @@ set(SRC
   # input nodes
   ${CMP_NODES}/input/COM_BokehImageNode.cpp
   ${CMP_NODES}/input/COM_BokehImageNode.h
+<<<<<<< HEAD
+=======
+  ${CMP_NODES}/input/COM_CameraNode.cpp
+  ${CMP_NODES}/input/COM_CameraNode.h
+>>>>>>> upstream/compositor-up
   ${CMP_NODES}/input/COM_ColorNode.cpp
   ${CMP_NODES}/input/COM_ColorNode.h
   ${CMP_NODES}/input/COM_ImageNode.cpp
@@ -407,6 +439,15 @@ set(SRC
   ${CMP_NODES}/layout/COM_SwitchNode.cpp
   ${CMP_NODES}/layout/COM_SwitchNode.h
 
+<<<<<<< HEAD
+=======
+  # experimental nodes
+  ${CMP_NODES}/experimental/COM_ExtendNode.cpp
+  ${CMP_NODES}/experimental/COM_ExtendNode.h
+  ${CMP_NODES}/experimental/COM_RandomizeNode.cpp
+  ${CMP_NODES}/experimental/COM_RandomizeNode.h
+
+>>>>>>> upstream/compositor-up
   # Internal operations
   ${CMP_OPS}/COM_AntiAliasOperation.cpp
   ${CMP_OPS}/COM_AntiAliasOperation.h
@@ -434,6 +475,11 @@ set(SRC
   ${CMP_OPS}/input/COM_MaskOperation.h
   ${CMP_OPS}/input/COM_CacheOperation.cpp
   ${CMP_OPS}/input/COM_CacheOperation.h
+<<<<<<< HEAD
+=======
+  ${CMP_OPS}/input/COM_CameraOperation.cpp
+  ${CMP_OPS}/input/COM_CameraOperation.h
+>>>>>>> upstream/compositor-up
   ${CMP_OPS}/input/COM_MovieClipOperation.cpp
   ${CMP_OPS}/input/COM_MovieClipOperation.h
   ${CMP_OPS}/input/COM_MultilayerImageOperation.cpp
@@ -651,6 +697,14 @@ set(SRC
   ${CMP_OPS}/distort/COM_TransformOperation.cpp
   ${CMP_OPS}/distort/COM_TransformOperation.h
 
+<<<<<<< HEAD
+=======
+  # experimental operations
+  ${CMP_OPS}/experimental/COM_ExtendOperation.cpp
+  ${CMP_OPS}/experimental/COM_ExtendOperation.h
+  ${CMP_OPS}/experimental/COM_RandomizeOperation.cpp
+  ${CMP_OPS}/experimental/COM_RandomizeOperation.h
+>>>>>>> upstream/compositor-up
 )
 
 source_group(TREE ${CMP_BASE} FILES ${SRC})
@@ -660,6 +714,10 @@ set(LIB
   bf_blenkernel
   bf_blenlib
   bf_depsgraph
+<<<<<<< HEAD
+=======
+  bf_sequencer
+>>>>>>> upstream/compositor-up
   cycles_util
   extern_clew
   ${BOOST_LIBRARIES}
@@ -700,6 +758,11 @@ data_to_c(
   ${CMP_BASE}/computing/COM_OpenCLKernels.cl.h
   SRC
 )
+<<<<<<< HEAD
+=======
+#set(BOOST_DEFINITIONS "-DBOOST_ALL_NO_LIB")
+add_definitions(${BOOST_DEFINITIONS} -DBOOST_UUID_RANDOM_PROVIDER_FORCE_WINCRYPT)
+>>>>>>> upstream/compositor-up
 
 blender_add_lib(bf_compositor "${SRC}" "${INC}" "${INC_SYS}" "${LIB}")
 

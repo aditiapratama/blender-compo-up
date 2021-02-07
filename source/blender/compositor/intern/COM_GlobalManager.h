@@ -33,6 +33,7 @@ class GlobalManager {
   BufferManager *BufferMan;
   ComputeManager *ComputeMan;
   CacheManager *CacheMan;
+<<<<<<< HEAD:source/blender/compositor/intern/COM_GlobalManager.h
 
   const CompositorContext *m_context;
 
@@ -42,6 +43,21 @@ class GlobalManager {
   const CompositorContext *getContext()
   {
     return m_context;
+=======
+  CompositorContext *m_context;
+  Renderer *m_renderer;
+
+  void initialize(CompositorContext &ctx);
+  void deinitialize(CompositorContext &ctx);
+
+  CompositorContext *getContext()
+  {
+    return m_context;
+  }
+  Renderer *renderer()
+  {
+    return m_renderer;
+>>>>>>> upstream/compositor-up:source/blender/compositor/intern/COM_Device.h
   }
 
   GlobalManager();

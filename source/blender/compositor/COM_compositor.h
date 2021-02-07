@@ -18,9 +18,6 @@
 
 #pragma once
 
-#include "DNA_color_types.h"
-#include "DNA_node_types.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -338,6 +335,7 @@ extern "C" {
  *            generation in display space
  */
 /* clang-format off */
+<<<<<<< HEAD
 
 void COM_execute(struct Main *main,
                  struct Depsgraph *depsgrah,
@@ -349,6 +347,10 @@ void COM_execute(struct Main *main,
                  const ColorManagedViewSettings *viewSettings,
                  const ColorManagedDisplaySettings *displaySettings,
                  const char *viewName);
+=======
+struct CompositTreeExec;
+void COM_execute(struct CompositTreeExec *exec_data);
+>>>>>>> upstream/compositor-up
 
 /**
  * \brief Deinitialize the compositor caches and allocated memory.
@@ -356,11 +358,6 @@ void COM_execute(struct Main *main,
  */
 void COM_deinitialize(void);
 
-/**
- * \brief Clear all compositor caches. (Compositor system will still remain available).
- * To deinitialize the compositor use the COM_deinitialize method.
- */
-// void COM_clearCaches(void); // NOT YET WRITTEN
 
 #ifdef __cplusplus
 }

@@ -72,7 +72,11 @@ class BufferManager {
   {
     return m_initialized;
   }
+<<<<<<< HEAD
   void initialize(const CompositorContext &context);
+=======
+  void initialize(CompositorContext &context);
+>>>>>>> upstream/compositor-up
   void deinitialize(bool isBreaked);
 
   void readOptimize(NodeOperation *op, NodeOperation *reader_op, ExecutionManager &man);

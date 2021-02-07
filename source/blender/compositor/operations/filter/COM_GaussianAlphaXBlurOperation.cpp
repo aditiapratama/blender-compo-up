@@ -16,11 +16,21 @@
  * Copyright 2011, Blender Foundation.
  */
 
+<<<<<<< HEAD
 #include "COM_GaussianAlphaXBlurOperation.h"
 #include "COM_ComputeKernel.h"
 #include "COM_ExecutionManager.h"
 #include "COM_kernel_cpu.h"
 #include "MEM_guardedalloc.h"
+=======
+#include "MEM_guardedalloc.h"
+
+#include "COM_ComputeKernel.h"
+#include "COM_ExecutionManager.h"
+#include "COM_GaussianAlphaXBlurOperation.h"
+
+#include "COM_kernel_cpu.h"
+>>>>>>> upstream/compositor-up
 
 GaussianAlphaXBlurOperation::GaussianAlphaXBlurOperation()
     : GaussianBlurBaseOperation(SocketType::VALUE)

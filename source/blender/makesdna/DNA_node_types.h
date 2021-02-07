@@ -482,7 +482,12 @@ typedef struct bNodeTree {
   /* Enum setting for choosing a predefined preview size (Small, Medium, Big). Compositor only */
   short preview_size;
 
+<<<<<<< HEAD
   char _pad[2];
+=======
+  /* Auto-composite option for compositor */
+  short auto_comp;
+>>>>>>> upstream/compositor-up
 
   /** Execution data.
    *
@@ -618,6 +623,12 @@ enum {
   CMP_NODEFLAG_BLUR_VARIABLE_SIZE = (1 << 0),
   CMP_NODEFLAG_BLUR_EXTEND_BOUNDS = (1 << 1),
 };
+
+/*Experimental compositor-up*/
+enum {
+  CMP_NODEFLAG_RANDOMIZE_SEED = (1 << 0),
+};
+/*END of Experimental compositor-up*/
 
 typedef struct NodeFrame {
   short flag;
@@ -768,6 +779,23 @@ typedef struct NodeTwoFloats {
 typedef struct NodeVertexCol {
   char name[64];
 } NodeVertexCol;
+
+/* Experimental compositor-up */
+typedef struct NodeExtend {
+  float add_extend_x, add_extend_y;
+  float scale;
+  short extend_mode;
+  char _pad1[2];
+} NodeExtend;
+typedef struct NodeRandomize {
+  float min, max;
+  float variance_down, variance_up;
+  int variance_steps;
+  int seed;
+  short flag;
+  char _pad[6];
+} NodeRandomize;
+/* END of Experimental compositor-up */
 
 /* qdn: Defocus blur node */
 typedef struct NodeDefocus {
@@ -1061,6 +1089,11 @@ typedef struct NodeDenoise {
   char hdr;
   char _pad[7];
 } NodeDenoise;
+
+typedef struct NodeCamera {
+  int draw_mode;
+  int frame_offset;
+} NodeCamera;
 
 /* script node mode */
 #define NODE_SCRIPT_INTERNAL 0
@@ -1362,7 +1395,7 @@ enum {
 /* subsurface */
 enum {
 #ifdef DNA_DEPRECATED_ALLOW
-  SHD_SUBSURFACE_COMPATIBLE = 0,  // Deprecated
+  SHD_SUBSURFACE_COMPATIBLE = 0, /* Deprecated */
 #endif
   SHD_SUBSURFACE_CUBIC = 1,
   SHD_SUBSURFACE_GAUSSIAN = 2,

@@ -224,6 +224,14 @@ DefNode(CompositorNode, CMP_NODE_CRYPTOMATTE,    def_cmp_cryptomatte,    "CRYPTO
 DefNode(CompositorNode, CMP_NODE_DENOISE,        def_cmp_denoise,        "DENOISE",        Denoise,          "Denoise",           ""              )
 DefNode(CompositorNode, CMP_NODE_CACHE,          def_cmp_cache,          "CACHE",          Cache,            "Cache",             ""              )
 DefNode(CompositorNode, CMP_NODE_VIDEO_SEQ,      def_cmp_video_sequencer,"VIDEOSEQ",       VideoSeq,         "Video Sequencer",   ""              )
+<<<<<<< HEAD
+=======
+DefNode(CompositorNode, CMP_NODE_CAMERA,         def_cmp_camera,         "CAMERA",         Camera,           "Camera View",            ""              )
+/* Experimental compositor-up */
+DefNode(CompositorNode, CMP_NODE_EXTEND,         def_cmp_extend,         "EXTEND",         Extend,           "Extend",            ""              )
+DefNode(CompositorNode, CMP_NODE_RANDOMIZE,      def_cmp_randomize,      "RANDOMIZE",      Randomize,         "Randomize",        ""              )
+/* END of Experimental compositor-up */
+>>>>>>> upstream/compositor-up
 
 DefNode(TextureNode,    TEX_NODE_OUTPUT,         def_tex_output,         "OUTPUT",         Output,           "Output",            ""              )
 DefNode(TextureNode,    TEX_NODE_CHECKER,        0,                      "CHECKER",        Checker,          "Checker",           ""              )
@@ -259,21 +267,6 @@ DefNode(TextureNode,    TEX_NODE_PROC+TEX_MUSGRAVE, 0,                   "TEX_MU
 DefNode(TextureNode,    TEX_NODE_PROC+TEX_NOISE, 0,                      "TEX_NOISE",      TexNoise,         "Noise",             ""              )
 DefNode(TextureNode,    TEX_NODE_PROC+TEX_STUCCI, 0,                     "TEX_STUCCI",     TexStucci,        "Stucci",            ""              )
 DefNode(TextureNode,    TEX_NODE_PROC+TEX_DISTNOISE, 0,                  "TEX_DISTNOISE",  TexDistNoise,     "Distorted Noise",   ""              )
-
-DefNode(SimulationNode, SIM_NODE_PARTICLE_SIMULATION, 0,                 "PARTICLE_SIMULATION", ParticleSimulation, "Particle Simulation", "")
-DefNode(SimulationNode, SIM_NODE_FORCE,        0,                        "FORCE",               Force,              "Force",               "")
-DefNode(SimulationNode, SIM_NODE_SET_PARTICLE_ATTRIBUTE, def_sim_set_particle_attribute, "SET_PARTICLE_ATTRIBUTE", SetParticleAttribute, "Set Particle Attribute", "")
-DefNode(SimulationNode, SIM_NODE_PARTICLE_BIRTH_EVENT,   0,              "PARTICLE_BIRTH_EVENT",   ParticleBirthEvent,   "Particle Birth Event",   "")
-DefNode(SimulationNode, SIM_NODE_PARTICLE_TIME_STEP_EVENT, def_sim_particle_time_step_event, "PARTICLE_TIME_STEP_EVENT", ParticleTimeStepEvent, "Particle Time Step Event", "")
-DefNode(SimulationNode, SIM_NODE_EXECUTE_CONDITION,   0,                 "EXECUTE_CONDITION",   ExecuteCondition,   "Execute Condition",    "")
-DefNode(SimulationNode, SIM_NODE_MULTI_EXECUTE,       0,                 "MULTI_EXECUTE",       MultiExecute,       "Multi Execute",        "")
-DefNode(SimulationNode, SIM_NODE_PARTICLE_MESH_EMITTER,  0,              "PARTICLE_MESH_EMITTER",  ParticleMeshEmitter,  "Particle Mesh Emitter", "")
-DefNode(SimulationNode, SIM_NODE_PARTICLE_MESH_COLLISION_EVENT, 0,       "PARTICLE_MESH_COLLISION_EVENT", ParticleMeshCollisionEvent, "Particle Mesh Collision Event", "")
-DefNode(SimulationNode, SIM_NODE_EMIT_PARTICLES, 0,                      "EMIT_PARTICLES",      EmitParticles,      "Emit Particles",       "")
-DefNode(SimulationNode, SIM_NODE_TIME,           def_sim_time,           "TIME",                Time,               "Time",                 "")
-DefNode(SimulationNode, SIM_NODE_PARTICLE_ATTRIBUTE, def_sim_particle_attribute, "PARTICLE_ATTRIBUTE",  ParticleAttribute,  "Particle Attribute",   "")
-DefNode(SimulationNode, SIM_NODE_AGE_REACHED_EVENT, 0, "AGE_REACHED_EVENT", AgeReachedEvent, "Age Reached Event", "")
-DefNode(SimulationNode, SIM_NODE_KILL_PARTICLE, 0, "KILL_PARTICLE", KillParticle, "Kill Particle", "")
 
 DefNode(FunctionNode, FN_NODE_BOOLEAN_MATH,  def_boolean_math,  "BOOLEAN_MATH",  BooleanMath,  "Boolean Math", "")
 DefNode(FunctionNode, FN_NODE_FLOAT_COMPARE, def_float_compare, "FLOAT_COMPARE", FloatCompare, "Float Compare", "")

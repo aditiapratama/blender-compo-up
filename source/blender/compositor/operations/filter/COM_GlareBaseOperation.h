@@ -18,9 +18,16 @@
 
 #pragma once
 
+<<<<<<< HEAD
 #include "COM_NodeOperation.h"
 #include "DNA_node_types.h"
 
+=======
+#include "DNA_node_types.h"
+
+#include "COM_NodeOperation.h"
+
+>>>>>>> upstream/compositor-up
 class GlareBaseOperation : public NodeOperation {
  private:
   /**

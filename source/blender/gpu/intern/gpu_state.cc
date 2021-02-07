@@ -167,7 +167,8 @@ void GPU_depth_range(float near, float far)
 
 void GPU_line_width(float width)
 {
-  SET_MUTABLE_STATE(line_width, width * PIXELSIZE);
+  width = max_ff(1.0f, width * PIXELSIZE);
+  SET_MUTABLE_STATE(line_width, width);
 }
 
 void GPU_point_size(float size)
@@ -317,10 +318,50 @@ void GPU_apply_state(void)
   Context::get()->state_manager->apply_state();
 }
 
-/* Will set all the states regardless of the current ones. */
-void GPU_force_state(void)
+/** \} */
+
+/* -------------------------------------------------------------------- */
+/** \name BGL workaround
+ *
+ * bgl makes direct GL calls that makes our state tracking out of date.
+ * This flag make it so that the pyGPU calls will not override the state set by
+ * bgl functions.
+ * \{ */
+
+void GPU_bgl_start(void)
 {
-  Context::get()->state_manager->force_state();
+  Context *ctx = Context::get();
+  if (!(ctx && ctx->state_manager)) {
+    return;
+  }
+  StateManager &state_manager = *(Context::get()->state_manager);
+  if (state_manager.use_bgl == false) {
+    /* Expected by many addons (see T80169, T81289).
+     * This will reset the blend function. */
+    GPU_blend(GPU_BLEND_NONE);
+    state_manager.apply_state();
+    state_manager.use_bgl = true;
+  }
+}
+
+/* Just turn off the bgl safeguard system. Can be called even without GPU_bgl_start. */
+void GPU_bgl_end(void)
+{
+  Context *ctx = Context::get();
+  if (!(ctx && ctx->state_manager)) {
+    return;
+  }
+  StateManager &state_manager = *ctx->state_manager;
+  if (state_manager.use_bgl == true) {
+    state_manager.use_bgl = false;
+    /* Resync state tracking. */
+    state_manager.force_state();
+  }
+}
+
+bool GPU_bgl_get(void)
+{
+  return Context::get()->state_manager->use_bgl;
 }
 
 /** \} */
@@ -353,8 +394,9 @@ StateManager::StateManager(void)
   state.logic_op_xor = false;
   state.invert_facing = false;
   state.shadow_bias = false;
-  state.polygon_smooth = false;
   state.clip_distances = 0;
+  state.polygon_smooth = false;
+  state.line_smooth = false;
 
   mutable_state.depth_range[0] = 0.0f;
   mutable_state.depth_range[1] = 1.0f;

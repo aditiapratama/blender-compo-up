@@ -189,9 +189,9 @@ void BKE_lib_override_library_free(struct IDOverrideLibrary **override, const bo
 
 static ID *lib_override_library_create_from(Main *bmain, ID *reference_id)
 {
-  ID *local_id;
+  ID *local_id = BKE_id_copy(bmain, reference_id);
 
-  if (!BKE_id_copy(bmain, reference_id, (ID **)&local_id)) {
+  if (local_id == NULL) {
     return NULL;
   }
   id_us_min(local_id);
@@ -597,32 +597,30 @@ static void lib_override_library_create_post_process(
             case ID_GR: {
               default_instantiating_collection = BKE_collection_add(
                   bmain, (Collection *)id_root, "OVERRIDE_HIDDEN");
+              /* Hide the collection from viewport and render. */
+              default_instantiating_collection->flag |= COLLECTION_RESTRICT_VIEWPORT |
+                                                        COLLECTION_RESTRICT_RENDER;
               break;
             }
             case ID_OB: {
-              /* Add the new container collection to one of the collections instantiating the
+              /* Add the other objects to one of the collections instantiating the
                * root object, or scene's master collection if none found. */
               Object *ob_root = (Object *)id_root;
               LISTBASE_FOREACH (Collection *, collection, &bmain->collections) {
                 if (BKE_collection_has_object(collection, ob_root) &&
                     BKE_view_layer_has_collection(view_layer, collection) &&
                     !ID_IS_LINKED(collection) && !ID_IS_OVERRIDE_LIBRARY(collection)) {
-                  default_instantiating_collection = BKE_collection_add(
-                      bmain, collection, "OVERRIDE_HIDDEN");
+                  default_instantiating_collection = collection;
                 }
               }
               if (default_instantiating_collection == NULL) {
-                default_instantiating_collection = BKE_collection_add(
-                    bmain, scene->master_collection, "OVERRIDE_HIDDEN");
+                default_instantiating_collection = scene->master_collection;
               }
               break;
             }
             default:
               BLI_assert(0);
           }
-          /* Hide the collection from viewport and render. */
-          default_instantiating_collection->flag |= COLLECTION_RESTRICT_VIEWPORT |
-                                                    COLLECTION_RESTRICT_RENDER;
         }
 
         BKE_collection_object_add(bmain, default_instantiating_collection, ob_new);
@@ -1232,13 +1230,16 @@ bool BKE_lib_override_library_status_check_local(Main *bmain, ID *local)
   BLI_assert(GS(local->name) == GS(reference->name));
 
   if (GS(local->name) == ID_OB) {
-    /* Our beloved pose's bone cross-data pointers... Usually, depsgraph evaluation would ensure
-     * this is valid, but in some cases (like hidden collections etc.) this won't be the case, so
-     * we need to take care of this ourselves. */
+    /* Our beloved pose's bone cross-data pointers.. Usually, depsgraph evaluation would
+     * ensure this is valid, but in some situations (like hidden collections etc.) this won't
+     * be the case, so we need to take care of this ourselves. */
     Object *ob_local = (Object *)local;
-    if (ob_local->data != NULL && ob_local->type == OB_ARMATURE && ob_local->pose != NULL &&
-        ob_local->pose->flag & POSE_RECALC) {
-      BKE_pose_rebuild(bmain, ob_local, ob_local->data, true);
+    if (ob_local->type == OB_ARMATURE) {
+      Object *ob_reference = (Object *)local->override_library->reference;
+      BLI_assert(ob_local->data != NULL);
+      BLI_assert(ob_reference->data != NULL);
+      BKE_pose_ensure(bmain, ob_local, ob_local->data, true);
+      BKE_pose_ensure(bmain, ob_reference, ob_reference->data, true);
     }
   }
 
@@ -1298,13 +1299,16 @@ bool BKE_lib_override_library_status_check_reference(Main *bmain, ID *local)
   }
 
   if (GS(local->name) == ID_OB) {
-    /* Our beloved pose's bone cross-data pointers... Usually, depsgraph evaluation would ensure
-     * this is valid, but in some cases (like hidden collections etc.) this won't be the case, so
-     * we need to take care of this ourselves. */
+    /* Our beloved pose's bone cross-data pointers.. Usually, depsgraph evaluation would
+     * ensure this is valid, but in some situations (like hidden collections etc.) this won't
+     * be the case, so we need to take care of this ourselves. */
     Object *ob_local = (Object *)local;
-    if (ob_local->data != NULL && ob_local->type == OB_ARMATURE && ob_local->pose != NULL &&
-        ob_local->pose->flag & POSE_RECALC) {
-      BKE_pose_rebuild(bmain, ob_local, ob_local->data, true);
+    if (ob_local->type == OB_ARMATURE) {
+      Object *ob_reference = (Object *)local->override_library->reference;
+      BLI_assert(ob_local->data != NULL);
+      BLI_assert(ob_reference->data != NULL);
+      BKE_pose_ensure(bmain, ob_local, ob_local->data, true);
+      BKE_pose_ensure(bmain, ob_reference, ob_reference->data, true);
     }
   }
 
@@ -1355,13 +1359,16 @@ bool BKE_lib_override_library_operations_create(Main *bmain, ID *local)
     }
 
     if (GS(local->name) == ID_OB) {
-      /* Our beloved pose's bone cross-data pointers... Usually, depsgraph evaluation would
+      /* Our beloved pose's bone cross-data pointers.. Usually, depsgraph evaluation would
        * ensure this is valid, but in some situations (like hidden collections etc.) this won't
        * be the case, so we need to take care of this ourselves. */
       Object *ob_local = (Object *)local;
-      if (ob_local->data != NULL && ob_local->type == OB_ARMATURE && ob_local->pose != NULL &&
-          ob_local->pose->flag & POSE_RECALC) {
-        BKE_pose_rebuild(bmain, ob_local, ob_local->data, true);
+      if (ob_local->type == OB_ARMATURE) {
+        Object *ob_reference = (Object *)local->override_library->reference;
+        BLI_assert(ob_local->data != NULL);
+        BLI_assert(ob_reference->data != NULL);
+        BKE_pose_ensure(bmain, ob_local, ob_local->data, true);
+        BKE_pose_ensure(bmain, ob_reference, ob_reference->data, true);
       }
     }
 
@@ -1417,6 +1424,17 @@ void BKE_lib_override_library_main_operations_create(Main *bmain, const bool for
    */
   if (force_auto) {
     BKE_lib_override_library_main_tag(bmain, IDOVERRIDE_LIBRARY_TAG_UNUSED, true);
+  }
+
+  /* Usual pose bones issue, need to be done outside of the threaded process or we may run into
+   * concurency issues here.
+   * Note that calling #BKE_pose_ensure again in thread in
+   * #BKE_lib_override_library_operations_create is not a problem then.. */
+  LISTBASE_FOREACH (Object *, ob, &bmain->objects) {
+    if (ob->type == OB_ARMATURE) {
+      BLI_assert(ob->data != NULL);
+      BKE_pose_ensure(bmain, ob, ob->data, true);
+    }
   }
 
   TaskPool *task_pool = BLI_task_pool_create(bmain, TASK_PRIORITY_HIGH);
@@ -1699,8 +1717,7 @@ void BKE_lib_override_library_update(Main *bmain, ID *local)
    * Not impossible to do, but would rather see first if extra useless usual user handling
    * is actually a (performances) issue here. */
 
-  ID *tmp_id;
-  BKE_id_copy(bmain, local->override_library->reference, &tmp_id);
+  ID *tmp_id = BKE_id_copy(bmain, local->override_library->reference);
 
   if (tmp_id == NULL) {
     return;
@@ -1843,6 +1860,7 @@ ID *BKE_lib_override_library_operations_store_start(Main *bmain,
 
   BLI_assert(ID_IS_OVERRIDE_LIBRARY_REAL(local));
   BLI_assert(override_storage != NULL);
+  UNUSED_VARS_NDEBUG(override_storage);
 
   /* Forcefully ensure we know about all needed override operations. */
   BKE_lib_override_library_operations_create(bmain, local);
@@ -1867,7 +1885,7 @@ ID *BKE_lib_override_library_operations_store_start(Main *bmain,
    * (and possibly all over Blender code).
    * Not impossible to do, but would rather see first is extra useless usual user handling is
    * actually a (performances) issue here, before doing it. */
-  BKE_id_copy((Main *)override_storage, local, &storage_id);
+  storage_id = BKE_id_copy((Main *)override_storage, local);
 
   if (storage_id != NULL) {
     PointerRNA rnaptr_reference, rnaptr_final, rnaptr_storage;

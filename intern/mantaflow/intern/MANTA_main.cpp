@@ -56,7 +56,8 @@ using std::to_string;
 atomic<int> MANTA::solverID(0);
 int MANTA::with_debug(0);
 
-MANTA::MANTA(int *res, FluidModifierData *fmd) : mCurrentID(++solverID)
+MANTA::MANTA(int *res, FluidModifierData *fmd)
+    : mCurrentID(++solverID), mMaxRes(fmd->domain->maxres)
 {
   if (with_debug)
     cout << "FLUID: " << mCurrentID << " with res(" << res[0] << ", " << res[1] << ", " << res[2]
@@ -85,11 +86,10 @@ MANTA::MANTA(int *res, FluidModifierData *fmd) : mCurrentID(++solverID)
   mUsingInvel = (fds->active_fields & FLUID_DOMAIN_ACTIVE_INVEL);
   mUsingOutflow = (fds->active_fields & FLUID_DOMAIN_ACTIVE_OUTFLOW);
 
-  /* Simulation constants. */
-  mResX = res[0];
+  /* Simulation constants */
+  mResX = res[0]; /* Current size of domain (will adjust with adaptive domain). */
   mResY = res[1];
   mResZ = res[2];
-  mMaxRes = MAX3(mResX, mResY, mResZ);
   mTotalCells = mResX * mResY * mResZ;
   mResGuiding = fds->res;
 
@@ -740,11 +740,13 @@ void MANTA::initializeRNAMap(FluidModifierData *fmd)
   else if (fds->openvdb_compression == VDB_COMPRESSION_BLOSC)
     vdbCompressionMethod = "Compression_Blosc";
 
-  string vdbPrecisionHalf = "True";
-  if (fds->openvdb_data_depth == VDB_PRECISION_HALF_FLOAT)
-    vdbPrecisionHalf = "True";
-  else if (fds->openvdb_data_depth == VDB_PRECISION_FULL_FLOAT)
-    vdbPrecisionHalf = "False";
+  string vdbPrecisionHalf = "Precision_Half";
+  if (fds->openvdb_data_depth == VDB_PRECISION_FULL_FLOAT)
+    vdbPrecisionHalf = "Precision_Full";
+  else if (fds->openvdb_data_depth == VDB_PRECISION_HALF_FLOAT)
+    vdbPrecisionHalf = "Precision_Half";
+  else if (fds->openvdb_data_depth == VDB_PRECISION_MINI_FLOAT)
+    vdbPrecisionHalf = "Precision_Mini";
 
   mRNAMap["USING_SMOKE"] = getBooleanString(fds->type == FLUID_DOMAIN_TYPE_GAS);
   mRNAMap["USING_LIQUID"] = getBooleanString(fds->type == FLUID_DOMAIN_TYPE_LIQUID);
@@ -843,6 +845,7 @@ void MANTA::initializeRNAMap(FluidModifierData *fmd)
   mRNAMap["PARTICLE_MAXIMUM"] = to_string(fds->particle_maximum);
   mRNAMap["PARTICLE_RADIUS"] = to_string(fds->particle_radius);
   mRNAMap["FRACTIONS_THRESHOLD"] = to_string(fds->fractions_threshold);
+  mRNAMap["FRACTIONS_DISTANCE"] = to_string(fds->fractions_distance);
   mRNAMap["MESH_CONCAVE_UPPER"] = to_string(fds->mesh_concave_upper);
   mRNAMap["MESH_CONCAVE_LOWER"] = to_string(fds->mesh_concave_lower);
   mRNAMap["MESH_PARTICLE_RADIUS"] = to_string(fds->mesh_particle_radius);

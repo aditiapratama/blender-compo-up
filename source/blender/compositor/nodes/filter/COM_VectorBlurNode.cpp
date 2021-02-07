@@ -26,7 +26,7 @@ VectorBlurNode::VectorBlurNode(bNode *editorNode) : Node(editorNode)
 }
 
 void VectorBlurNode::convertToOperations(NodeConverter &converter,
-                                         const CompositorContext &context) const
+                                         CompositorContext &context) const
 {
   bNode *node = this->getbNode();
   NodeBlurData *vectorBlurSettings = (NodeBlurData *)node->storage;
@@ -38,7 +38,12 @@ void VectorBlurNode::convertToOperations(NodeConverter &converter,
 
   converter.mapInputSocket(getInputSocket(0), operation->getInputSocket(0));
   converter.mapInputSocket(getInputSocket(1), operation->getInputSocket(1));
+<<<<<<< HEAD:source/blender/compositor/nodes/filter/COM_VectorBlurNode.cpp
   // We must allow mapping different socket types because in Node is VECTOR but in Operation must be COLOR
+=======
+  // We must allow mapping different socket types because in Node is VECTOR but in Operation must
+  // be COLOR
+>>>>>>> upstream/compositor-up:source/blender/compositor/nodes/COM_VectorBlurNode.cpp
   converter.mapInputSocket(getInputSocket(2), operation->getInputSocket(2), false);
   converter.mapOutputSocket(getOutputSocket(), operation->getOutputSocket());
 }

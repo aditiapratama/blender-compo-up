@@ -25,14 +25,17 @@
 
 #include "DNA_color_types.h"
 #include "DNA_node_types.h"
+#include "DNA_object_types.h"
 #include "DNA_scene_types.h"
 
+#include "BLI_listbase.h"
 #include "BLT_translation.h"
 
 #include "BKE_context.h"
 #include "BKE_global.h"
 #include "BKE_main.h"
 #include "BKE_node.h"
+#include "BKE_scene.h"
 #include "BKE_tracking.h"
 
 #include "node_common.h"
@@ -73,12 +76,12 @@ static void foreach_nodeclass(Scene *UNUSED(scene), void *calldata, bNodeClassCa
   func(calldata, NODE_CLASS_GROUP, N_("Group"));
   func(calldata, NODE_CLASS_INTERFACE, N_("Interface"));
   func(calldata, NODE_CLASS_LAYOUT, N_("Layout"));
+  func(calldata, NODE_CLASS_SCRIPT, N_("Experimental"));
 }
 
 static void free_node_cache(bNodeTree *UNUSED(ntree), bNode *node)
 {
   bNodeSocket *sock;
-
   for (sock = node->outputs.first; sock; sock = sock->next) {
     if (sock->cache) {
       sock->cache = NULL;
@@ -239,6 +242,7 @@ void register_node_tree_type_cmp(void)
 extern void *COM_linker_hack; /* Quiet warning. */
 void *COM_linker_hack = NULL;
 
+<<<<<<< HEAD
 void ntreeCompositExecTree(Main *main,
                            Depsgraph *depsgraph,
                            Scene *scene,
@@ -273,9 +277,17 @@ void ntreeCompositExecTree(Main *main,
               view_settings,
               display_settings,
               view_name);
+=======
+void ntreeCompositExecTree(CompositTreeExec *exec_data)
+{
+#ifdef WITH_COMPOSITOR
+  COM_execute(exec_data);
+#else
+  UNUSED_VARS(exec_data);
+>>>>>>> upstream/compositor-up
 #endif
 
-  UNUSED_VARS(do_preview);
+  UNUSED_VARS(exec_data);
 }
 
 /* *********************************************** */

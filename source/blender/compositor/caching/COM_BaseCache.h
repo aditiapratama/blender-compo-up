@@ -89,7 +89,11 @@ class BaseCache {
 
  private:
   void deleteCacheInfo(CacheInfo *info);
+<<<<<<< HEAD
   void prefetchNextCache();
+=======
+  void prefetchNextCache(const OpKey *last_prefetch_op_key);
+>>>>>>> upstream/compositor-up
 
  public:
   virtual void initialize(const CompositorContext *ctx);
@@ -115,8 +119,13 @@ class BaseCache {
 
   // Returns null if there were any problem getting the cache (e.g. user deleted it from disk)
   float *getCache(const OpKey &op_key);
+<<<<<<< HEAD
   // should be called only once per each cache during current execution. Returns null if there were
   // any problem getting the cache (e.g. user deleted it from disk)
+=======
+  // should be called only once per each cache operation during current execution. Returns null if
+  // there were any problem getting the cache (e.g. user deleted it from disk)
+>>>>>>> upstream/compositor-up
   float *getCacheAndPrefetchNext(const OpKey &op_key);
   bool hasCache(const OpKey &op_key);
 
@@ -138,8 +147,11 @@ class BaseCache {
   // last_use_time must be in nanoseoncds from linux epoch, if 0 current time will be set
   CacheInfo *loadCacheInfo(const OpKey &key, uint64_t last_save_time, uint64_t last_use_time);
 
+<<<<<<< HEAD
   // last_use_time must only be given when the data being saved has been retrieved from other type
   // of cache
+=======
+>>>>>>> upstream/compositor-up
   virtual void saveCache(const CacheInfo *info,
                          float *data,
                          std::function<void()> on_save_end) = 0;

@@ -21,11 +21,20 @@
 #include "BKE_image.h"
 #include "BKE_movieclip.h"
 #include "BLI_listbase.h"
+<<<<<<< HEAD
+=======
+#include "IMB_colormanagement.h"
+#include "IMB_imbuf.h"
+
+>>>>>>> upstream/compositor-up
 #include "COM_BufferUtil.h"
 #include "COM_ExecutionManager.h"
 #include "COM_MovieClipOperation.h"
 #include "COM_PixelsUtil.h"
+<<<<<<< HEAD
 #include "IMB_imbuf.h"
+=======
+>>>>>>> upstream/compositor-up
 
 #include "COM_kernel_cpu.h"
 
@@ -37,13 +46,18 @@ MovieClipBaseOperation::MovieClipBaseOperation() : NodeOperation()
   this->m_clip_imbuf = NULL;
   this->m_movieClipUser = NULL;
   this->m_framenumber = 0;
+<<<<<<< HEAD
   this->m_cacheFrame = 0;
+=======
+  this->m_cacheFrame = false;
+>>>>>>> upstream/compositor-up
 }
 
 void MovieClipBaseOperation::initExecution()
 {
   if (this->m_movieClip) {
     BKE_movieclip_user_set_frame(this->m_movieClipUser, this->m_framenumber);
+<<<<<<< HEAD
     ImBuf *ibuf;
 
     if (this->m_cacheFrame) {
@@ -61,6 +75,16 @@ void MovieClipBaseOperation::initExecution()
         ibuf->userflags &= ~IB_RECT_INVALID;
       }
     }
+=======
+
+    if (this->m_cacheFrame) {
+      m_clip_imbuf = BKE_movieclip_get_ibuf(this->m_movieClip, this->m_movieClipUser);
+    }
+    else {
+      m_clip_imbuf = BKE_movieclip_get_ibuf_flag(
+          this->m_movieClip, this->m_movieClipUser, this->m_movieClip->flag, MOVIECLIP_CACHE_SKIP);
+    }
+>>>>>>> upstream/compositor-up
   }
   NodeOperation::initExecution();
 }
@@ -118,6 +142,7 @@ void MovieClipBaseOperation::hashParams()
 
 void MovieClipOperation::execPixels(ExecutionManager &man)
 {
+<<<<<<< HEAD
   auto cpuWrite = [&](PixelsRect &dst, const WriteRectContext & /*ctx*/) {
     if (m_clip_imbuf == nullptr ||
         (m_clip_imbuf->rect == nullptr && m_clip_imbuf->rect_float == nullptr)) {
@@ -157,6 +182,42 @@ void MovieClipOperation::execPixels(ExecutionManager &man)
     //                                                 m_clip_imbuf->channels;
     //  PixelsUtil::copyImBufRect(dst, m_clip_imbuf, n_channels, n_channels);
     //}
+=======
+  m_n_written_rects = 0;
+  auto cpuWrite = [&](PixelsRect &dst, const WriteRectContext &ctx) {
+    if (BufferUtil::isImBufAvailable(m_clip_imbuf)) {
+      int n_channels = m_clip_imbuf->channels == 0 ? COM_NUM_CHANNELS_COLOR :
+                                                     m_clip_imbuf->channels;
+      BLI_assert(n_channels == COM_NUM_CHANNELS_COLOR);
+      PixelsUtil::copyImBufRect(dst, m_clip_imbuf, n_channels, n_channels);
+
+      // if buffer width is the same as rect width, there is no pitch, so we may use the colorspace
+      // method by rect, otherwise it has to be the whole operation rect because it doesn't support
+      // pitch
+      if (dst.getWidth() == dst.tmp_buffer->host.bwidth) {
+        PixelsImg img = dst.pixelsImg();
+        IMB_colormanagement_colorspace_to_scene_linear(img.start,
+                                                       img.row_elems,
+                                                       img.col_elems,
+                                                       n_channels,
+                                                       m_clip_imbuf->rect_colorspace,
+                                                       false);
+      }
+      else {
+        m_mutex.lock();
+        m_n_written_rects++;
+        if (m_n_written_rects == ctx.n_rects) {
+          IMB_colormanagement_colorspace_to_scene_linear(dst.tmp_buffer->host.buffer,
+                                                         dst.tmp_buffer->width,
+                                                         dst.tmp_buffer->height,
+                                                         n_channels,
+                                                         m_clip_imbuf->rect_colorspace,
+                                                         false);
+        }
+        m_mutex.unlock();
+      }
+    }
+>>>>>>> upstream/compositor-up
   };
   cpuWriteSeek(man, cpuWrite);
 }
@@ -174,6 +235,7 @@ MovieClipAlphaOperation::MovieClipAlphaOperation() : MovieClipBaseOperation()
 void MovieClipAlphaOperation::execPixels(ExecutionManager &man)
 {
   auto cpuWrite = [&](PixelsRect &dst, const WriteRectContext & /*ctx*/) {
+<<<<<<< HEAD
     if (m_clip_imbuf == nullptr ||
         (m_clip_imbuf->rect == nullptr && m_clip_imbuf->rect_float == nullptr)) {
       PixelsUtil::setRectElem(dst, 0.0f);
@@ -199,6 +261,11 @@ void MovieClipAlphaOperation::execPixels(ExecutionManager &man)
 
       CPU_LOOP_END;
     }
+=======
+    int n_channels = m_clip_imbuf->channels == 0 ? COM_NUM_CHANNELS_COLOR : m_clip_imbuf->channels;
+    BLI_assert(n_channels == COM_NUM_CHANNELS_COLOR);
+    PixelsUtil::copyImBufRectChannel(dst, 0, m_clip_imbuf, 3, n_channels);
+>>>>>>> upstream/compositor-up
   };
   cpuWriteSeek(man, cpuWrite);
 }

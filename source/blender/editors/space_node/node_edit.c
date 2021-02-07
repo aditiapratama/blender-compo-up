@@ -23,6 +23,7 @@
 
 #include "MEM_guardedalloc.h"
 
+#include "DNA_camera_types.h"
 #include "DNA_light_types.h"
 #include "DNA_material_types.h"
 #include "DNA_node_types.h"
@@ -31,6 +32,8 @@
 
 #include "BLI_blenlib.h"
 #include "BLI_math.h"
+#include "BLI_session_uuid.h"
+#include "BLI_timer.h"
 
 #include "BKE_context.h"
 #include "BKE_global.h"
@@ -39,6 +42,7 @@
 #include "BKE_main.h"
 #include "BKE_material.h"
 #include "BKE_node.h"
+#include "BKE_node_camera_view.h"
 #include "BKE_report.h"
 #include "BKE_scene.h"
 
@@ -50,9 +54,11 @@
 #include "RE_pipeline.h"
 
 #include "ED_node.h" /* own include */
+#include "ED_object.h"
 #include "ED_render.h"
 #include "ED_screen.h"
 #include "ED_select_utils.h"
+#include "ED_view3d_offscreen.h"
 
 #include "RNA_access.h"
 #include "RNA_define.h"
@@ -63,7 +69,10 @@
 
 #include "UI_view2d.h"
 
+#include "GPU_framebuffer.h"
 #include "GPU_material.h"
+
+#include "DRW_engine.h"
 
 #include "IMB_imbuf_types.h"
 
@@ -73,7 +82,103 @@
 #include "NOD_texture.h"
 #include "node_intern.h" /* own include */
 
+#include "PIL_time.h"
+
 #define USE_ESC_COMPO
+
+/* ******************** Node camera draw functions ********************************* */
+
+typedef struct NodeCameraJobContext {
+  const bContext *C;
+  wmJob *wm_job;
+} NodeCameraJobContext;
+
+/* if camera is NULL, scene camera will be used */
+ImBuf *node_camera_gl_draw(Scene *scene,
+                           ViewLayer *view_layer,
+                           const char *viewname,
+                           Camera *camera,
+                           int frame_offset,
+                           eDrawType draw_mode,
+                           NodeCameraJobContext *job_context)
+{
+  /* Should only be called from a job thread */
+  BLI_assert(!BLI_thread_is_main());
+
+  WM_job_main_thread_lock_acquire(job_context->wm_job);
+
+  Main *main = CTX_data_main(job_context->C);
+
+  int w = (scene->r.size * scene->r.xsch) / 100;
+  int h = (scene->r.size * scene->r.ysch) / 100;
+
+  Object *camera_obj = NULL;
+  if (!camera) {
+    camera_obj = scene->camera;
+  }
+  else if (camera->id.orig_id) {
+    LISTBASE_FOREACH (Object *, obj, &main->objects) {
+      if (STREQ(obj->id.name + 2, camera->id.name + 2)) {
+        camera_obj = obj;
+        break;
+      }
+    }
+  }
+
+  ImBuf *result = NULL;
+  if (camera_obj) {
+
+    char error[256];
+    /* corrects render size with actual size, not every card supports non-power-of-two
+     * dimensions
+     */
+    DRW_opengl_context_enable(); /* Offscreen creation needs to be done in DRW context. */
+    GPUOffScreen *gpu_buf = GPU_offscreen_create(w, h, true, true, error);
+    DRW_opengl_context_disable();
+
+    if (gpu_buf) {
+      short orig_r_mode = scene->r.mode;
+      short orig_r_scemode = scene->r.scemode;
+      short orig_r_frame = scene->r.cfra;
+
+      scene->r.mode |= R_NO_CAMERA_SWITCH;
+      scene->r.cfra += frame_offset;
+
+      unsigned int draw_flags = V3D_OFSDRAW_OVERRIDE_SCENE_SETTINGS;
+
+      Depsgraph *scene_dg = scene_dg = BKE_scene_ensure_depsgraph(main, scene, view_layer);
+      BKE_scene_graph_update_for_newframe(scene_dg);
+
+      result = ED_view3d_draw_offscreen_imbuf_simple(scene_dg,
+                                                     scene,
+                                                     &scene->display.shading,
+                                                     draw_mode,
+                                                     camera_obj,
+                                                     w,
+                                                     h,
+                                                     IB_rectfloat,
+                                                     (eV3DOffscreenDrawFlag)draw_flags,
+                                                     scene->r.alphamode,
+                                                     viewname,
+                                                     gpu_buf,
+                                                     error);
+
+      GPU_offscreen_free(gpu_buf);
+
+      if (!result) {
+        fprintf(stderr, "opengl camera render failed in a node space job: %s\n", error);
+      }
+
+      scene->r.scemode = orig_r_scemode;
+      scene->r.mode = orig_r_mode;
+      scene->r.cfra = orig_r_frame;
+    }
+  }
+
+  WM_job_main_thread_lock_release(job_context->wm_job);
+
+  return result;
+}
 
 /* ***************** composite job manager ********************** */
 
@@ -83,6 +188,10 @@ enum {
 };
 
 typedef struct CompoJob {
+  /* Do not use in compositor thread. Only for job initialization and finalization */
+  const bContext *C;
+  wmJob *wm_job;
+
   /* Input parameters. */
   Main *bmain;
   Scene *scene;
@@ -96,6 +205,7 @@ typedef struct CompoJob {
   const short *stop;
   short *do_update;
   float *progress;
+
 } CompoJob;
 
 static void compo_tag_output_nodes(bNodeTree *nodetree, int recalc_flags)
@@ -229,11 +339,42 @@ static void compo_updatejob(void *UNUSED(cjv))
   WM_main_add_notifier(NC_SCENE | ND_COMPO_RESULT, NULL);
 }
 
+static void compo_endjob(void *cjv)
+{
+}
+
 static void compo_progressjob(void *cjv, float progress)
 {
   CompoJob *cj = cjv;
 
   *(cj->progress) = progress;
+}
+
+static CompositTreeExec *build_composit_exec(CompoJob *cj)
+{
+  bNodeTree *ntree = cj->localtree;
+  Scene *scene = cj->scene;
+  CompositTreeExec *exec_data = (CompositTreeExec *)MEM_callocN(sizeof(CompositTreeExec),
+                                                                "CompositTreeExec");
+  exec_data->depsgraph = cj->compositor_depsgraph;
+  exec_data->main = cj->bmain;
+  exec_data->display_settings = &scene->display_settings;
+  exec_data->rendering = false;
+  exec_data->do_previews = true;
+  exec_data->ntree = ntree;
+  exec_data->view_layer = cj->view_layer;
+  exec_data->scene = cj->scene;
+  exec_data->rd = &cj->scene->r;
+  exec_data->view_settings = &scene->view_settings;
+
+  exec_data->job_context = (NodeCameraJobContext *)MEM_callocN(sizeof(NodeCameraJobContext),
+                                                               "NodeCameraJobContext");
+  exec_data->job_context->C = cj->C;
+  exec_data->job_context->wm_job = cj->wm_job;
+
+  exec_data->camera_draw_fn = node_camera_gl_draw;
+
+  return exec_data;
 }
 
 /* only this runs inside thread */
@@ -245,9 +386,9 @@ static void compo_startjob(void *cjv,
                            float *progress)
 {
   CompoJob *cj = cjv;
-  bNodeTree *ntree = cj->localtree;
-  Scene *scene = cj->scene;
   SceneRenderView *srv;
+  Scene *scene = cj->scene;
+  bNodeTree *ntree = cj->localtree;
 
   if (scene->use_nodes == false) {
     return;
@@ -266,9 +407,11 @@ static void compo_startjob(void *cjv,
   ntree->update_draw = compo_redrawjob;
   ntree->udh = cj;
 
+  CompositTreeExec *exec_data = build_composit_exec(cj);
   // XXX BIF_store_spare();
   /* 1 is do_previews */
   if ((cj->scene->r.scemode & R_MULTIVIEW) == 0) {
+<<<<<<< HEAD
     ntreeCompositExecTree(cj->bmain,
                           cj->compositor_depsgraph,
                           cj->scene,
@@ -280,12 +423,17 @@ static void compo_startjob(void *cjv,
                           &scene->view_settings,
                           &scene->display_settings,
                           "");
+=======
+    exec_data->viewname = "";
+    ntreeCompositExecTree(exec_data);
+>>>>>>> upstream/compositor-up
   }
   else {
-    for (srv = scene->r.views.first; srv; srv = srv->next) {
+    for (srv = cj->scene->r.views.first; srv; srv = srv->next) {
       if (BKE_scene_multiview_is_render_view_active(&scene->r, srv) == false) {
         continue;
       }
+<<<<<<< HEAD
       ntreeCompositExecTree(cj->bmain,
                             cj->compositor_depsgraph,
                             cj->scene,
@@ -297,8 +445,14 @@ static void compo_startjob(void *cjv,
                             &scene->view_settings,
                             &scene->display_settings,
                             srv->name);
+=======
+      exec_data->viewname = srv->name;
+      ntreeCompositExecTree(exec_data);
+>>>>>>> upstream/compositor-up
     }
   }
+  MEM_freeN(exec_data->job_context);
+  MEM_freeN(exec_data);
 
   ntree->test_break = NULL;
   ntree->stats_draw = NULL;
@@ -320,7 +474,7 @@ void ED_node_composite_job(const bContext *C, struct bNodeTree *nodetree, Scene 
   Scene *scene = CTX_data_scene(C);
   ViewLayer *view_layer = CTX_data_view_layer(C);
 
-  /* to fix bug: [#32272] */
+  /* to fix bug: T32272. */
   if (G.is_rendering) {
     return;
   }
@@ -339,6 +493,7 @@ void ED_node_composite_job(const bContext *C, struct bNodeTree *nodetree, Scene 
                        WM_JOB_EXCL_RENDER | WM_JOB_PROGRESS,
                        WM_JOB_TYPE_COMPOSITE);
   cj = MEM_callocN(sizeof(CompoJob), "compo job");
+  cj->C = C;
 
   /* customdata for preview thread */
   cj->bmain = bmain;
@@ -346,11 +501,12 @@ void ED_node_composite_job(const bContext *C, struct bNodeTree *nodetree, Scene 
   cj->view_layer = view_layer;
   cj->ntree = nodetree;
   cj->recalc_flags = compo_get_recalc_flags(C);
+  cj->wm_job = wm_job;
 
   /* setup job */
   WM_jobs_customdata_set(wm_job, cj, compo_freejob);
   WM_jobs_timer(wm_job, 0.1, NC_SCENE | ND_COMPO_RESULT, NC_SCENE | ND_COMPO_RESULT);
-  WM_jobs_callbacks(wm_job, compo_startjob, compo_initjob, compo_updatejob, NULL);
+  WM_jobs_callbacks(wm_job, compo_startjob, compo_initjob, compo_updatejob, compo_endjob);
 
   WM_jobs_start(CTX_wm_manager(C), wm_job);
 }
@@ -780,12 +936,12 @@ void ED_node_set_active(Main *bmain, bNodeTree *ntree, bNode *node, bool *r_acti
       }
     }
     else if (ntree->type == NTREE_TEXTURE) {
-      // XXX
+      /* XXX */
 #if 0
       if (node->id) {
-        // XXX BIF_preview_changed(-1);
-        // allqueue(REDRAWBUTSSHADING, 1);
-        // allqueue(REDRAWIPO, 0);
+        BIF_preview_changed(-1);
+        allqueue(REDRAWBUTSSHADING, 1);
+        allqueue(REDRAWIPO, 0);
       }
 #endif
     }
@@ -1385,7 +1541,7 @@ void ED_node_select_all(ListBase *lb, int action)
 }
 
 /* ******************************** */
-// XXX some code needing updating to operators...
+/* XXX some code needing updating to operators. */
 
 /* goes over all scenes, reads render layers */
 static int node_read_viewlayers_exec(bContext *C, wmOperator *UNUSED(op))
@@ -2731,7 +2887,7 @@ void NODE_OT_viewer_border(wmOperatorType *ot)
   ot->flag = OPTYPE_REGISTER | OPTYPE_UNDO;
 
   /* properties */
-  WM_operator_properties_gesture_box_select(ot);
+  WM_operator_properties_gesture_box(ot);
 }
 
 static int clear_viewer_border_exec(bContext *C, wmOperator *UNUSED(op))

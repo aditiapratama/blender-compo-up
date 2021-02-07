@@ -438,10 +438,15 @@ static openvdb::GridBase::ConstPtr openvdb_grid_from_device_texture(device_textu
                                 image_memory->data_width - 1,
                                 image_memory->data_height - 1,
                                 image_memory->data_depth - 1);
+
+  typename GridType::Ptr sparse = GridType::create(ValueType(0.0f));
+  if (dense_bbox.empty()) {
+    return sparse;
+  }
+
   openvdb::tools::Dense<ValueType, openvdb::tools::MemoryLayout::LayoutXYZ> dense(
       dense_bbox, static_cast<ValueType *>(image_memory->host_pointer));
 
-  typename GridType::Ptr sparse = GridType::create(ValueType(0.0f));
   openvdb::tools::copyFromDense(dense, *sparse, ValueType(volume_clipping));
 
   /* #copyFromDense will remove any leaf node that contains constant data and replace it with a
@@ -583,6 +588,7 @@ void GeometryManager::create_volume_mesh(Volume *volume, Progress &progress)
   volume->clear();
   volume->reserve_mesh(vertices.size(), indices.size() / 3);
   volume->used_shaders.push_back(volume_shader);
+  volume->need_update = true;
   volume->need_update_rebuild = true;
 
   for (size_t i = 0; i < vertices.size(); ++i) {

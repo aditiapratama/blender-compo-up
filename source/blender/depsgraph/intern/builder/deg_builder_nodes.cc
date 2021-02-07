@@ -511,7 +511,7 @@ void DepsgraphNodeBuilder::build_collection(LayerCollection *from_layer_collecti
     }
     else if (from_layer_collection == nullptr && !id_node->is_collection_fully_expanded) {
       /* Initially collection was built from layer now, and was requested
-       * to not recurs into object. But now it's asked to recurs into all objects. */
+       * to not recurse into object. But now it's asked to recurse into all objects. */
     }
     else {
       return;
@@ -1558,6 +1558,9 @@ void DepsgraphNodeBuilder::build_nodetree(bNodeTree *ntree)
     }
     else if (id_type == ID_MC) {
       build_movieclip((MovieClip *)id);
+    }
+    else if (id_type == ID_CA) {
+      build_camera((Camera *)id);
     }
     else if (ELEM(bnode->type, NODE_GROUP, NODE_CUSTOM_GROUP)) {
       bNodeTree *group_ntree = (bNodeTree *)id;

@@ -51,7 +51,7 @@ bool ExecutionGroup::addOperation(NodeOperation *operation)
 NodeOperation *ExecutionGroup::getOutputOperation() const
 {
   return this
-      ->m_operations[0];  // the first operation of the group is always the output operation.
+      ->m_operations[0]; /* the first operation of the group is always the output operation. */
 }
 
 #if defined(DEBUG) || defined(COM_DEBUG)

@@ -121,6 +121,10 @@ ccl_kernel screenLensDistortOp(CCL_WRITE(dst),
   WRITE_DECL(dst);
   CPU_LOOP_START(dst);
 
+<<<<<<< HEAD
+=======
+  uint64_t random_state = random_seed;
+>>>>>>> upstream/compositor-up
   float2 uv;
   uv.x = sc * ((dst_coords.x + 0.5f) - cx) / cx;
   uv.y = sc * ((dst_coords.y + 0.5f) - cy) / cy;
@@ -149,7 +153,11 @@ ccl_kernel screenLensDistortOp(CCL_WRITE(dst),
                dk4,
                sum,
                count,
+<<<<<<< HEAD
                &random_seed,
+=======
+               &random_state,
+>>>>>>> upstream/compositor-up
                dst_coords,
                jitter);
     a = 1;
@@ -167,7 +175,11 @@ ccl_kernel screenLensDistortOp(CCL_WRITE(dst),
                dk4,
                sum,
                count,
+<<<<<<< HEAD
                &random_seed,
+=======
+               &random_state,
+>>>>>>> upstream/compositor-up
                dst_coords,
                jitter);
 

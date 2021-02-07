@@ -52,7 +52,11 @@ BufferManager::~BufferManager()
   deinitialize(false);
 }
 
+<<<<<<< HEAD
 void BufferManager::initialize(const CompositorContext &context)
+=======
+void BufferManager::initialize(CompositorContext &context)
+>>>>>>> upstream/compositor-up
 {
   if (!m_initialized) {
 
@@ -87,8 +91,13 @@ void BufferManager::deinitialize(bool isBreaked)
         auto reads_list = entry.second;
         for (auto reader_reads : reads_list) {
           auto reads = reader_reads->reads;
+<<<<<<< HEAD
           BLI_assert(reads->current_cpu_reads == reads->total_cpu_reads);
           BLI_assert(reads->current_compute_reads == reads->total_compute_reads);
+=======
+          // BLI_assert(reads->current_cpu_reads == reads->total_cpu_reads);
+          // BLI_assert(reads->current_compute_reads == reads->total_compute_reads);
+>>>>>>> upstream/compositor-up
         }
       }
     }

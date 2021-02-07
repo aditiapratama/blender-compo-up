@@ -68,7 +68,11 @@ void WorkScheduler::schedule(WorkPackage *package)
 #endif
 }
 
+<<<<<<< HEAD
 void WorkScheduler::start(const CompositorContext & /*context*/)
+=======
+void WorkScheduler::start(CompositorContext & /*context*/)
+>>>>>>> upstream/compositor-up
 {
 #if COM_CURRENT_THREADING_MODEL == COM_TM_QUEUE
   unsigned int index;

@@ -63,6 +63,10 @@
 #include "COM_BokehImageNode.h"
 #include "COM_BrightnessNode.h"
 #include "COM_CacheNode.h"
+<<<<<<< HEAD
+=======
+#include "COM_CameraNode.h"
+>>>>>>> upstream/compositor-up
 #include "COM_ColorBalanceNode.h"
 #include "COM_ColorCorrectionNode.h"
 #include "COM_ColorCurveNode.h"
@@ -79,6 +83,10 @@
 #include "COM_DespeckleNode.h"
 #include "COM_DilateErodeNode.h"
 #include "COM_DirectionalBlurNode.h"
+<<<<<<< HEAD
+=======
+#include "COM_ExtendNode.h"
+>>>>>>> upstream/compositor-up
 #include "COM_FilterNode.h"
 #include "COM_GammaNode.h"
 #include "COM_GlareNode.h"
@@ -101,6 +109,10 @@
 #include "COM_NormalizeNode.h"
 #include "COM_OutputFileNode.h"
 #include "COM_PixelateNode.h"
+<<<<<<< HEAD
+=======
+#include "COM_RandomizeNode.h"
+>>>>>>> upstream/compositor-up
 #include "COM_RenderLayersNode.h"
 #include "COM_ScaleNode.h"
 #include "COM_ScaleOperation.h"
@@ -191,6 +203,12 @@ Node *Converter::convert(bNode *b_node)
     case CMP_NODE_VIDEO_SEQ:
       node = new VideoSequencerNode(b_node);
       break;
+<<<<<<< HEAD
+=======
+    case CMP_NODE_CAMERA:
+      node = new CameraNode(b_node);
+      break;
+>>>>>>> upstream/compositor-up
       /* */
 
       /* Color nodes*/
@@ -426,12 +444,30 @@ Node *Converter::convert(bNode *b_node)
       break;
       /* */
 
+<<<<<<< HEAD
     /* layout nodes */
     case CMP_NODE_SWITCH:
       node = new SwitchNode(b_node);
       break;
       /* */
 
+=======
+      /* experimental nodes */
+    case CMP_NODE_EXTEND:
+      node = new ExtendNode(b_node);
+      break;
+    case CMP_NODE_RANDOMIZE:
+      node = new RandomizeNode(b_node);
+      break;
+      /* */
+
+    /* layout nodes */
+    case CMP_NODE_SWITCH:
+      node = new SwitchNode(b_node);
+      break;
+      /* */
+
+>>>>>>> upstream/compositor-up
       /* handled by the NodeGraph */
     case NODE_GROUP:
     case NODE_GROUP_INPUT:

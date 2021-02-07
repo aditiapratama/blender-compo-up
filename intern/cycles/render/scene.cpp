@@ -95,7 +95,8 @@ Scene::Scene(const SceneParams &params_, Device *device)
       default_empty(NULL),
       device(device),
       dscene(device),
-      params(params_)
+      params(params_),
+      update_stats(NULL)
 {
   memset((void *)&dscene.data, 0, sizeof(dscene.data));
 
@@ -188,6 +189,7 @@ void Scene::free_memory(bool final)
     delete particle_system_manager;
     delete image_manager;
     delete bake_manager;
+    delete update_stats;
   }
 }
 
@@ -197,6 +199,20 @@ void Scene::device_update(Device *device_, Progress &progress)
     device = device_;
 
   bool print_stats = need_data_update();
+
+  if (update_stats) {
+    update_stats->clear();
+  }
+
+  scoped_callback_timer timer([this, print_stats](double time) {
+    if (update_stats) {
+      update_stats->scene.times.add_entry({"device_update", time});
+
+      if (print_stats) {
+        printf("Update statistics:\n%s\n", update_stats->full_report().c_str());
+      }
+    }
+  });
 
   /* The order of updates is important, because there's dependencies between
    * the different managers, using data computed by previous managers.
@@ -269,7 +285,7 @@ void Scene::device_update(Device *device_, Progress &progress)
     return;
 
   progress.set_status("Updating Lookup Tables");
-  lookup_tables->device_update(device, &dscene);
+  lookup_tables->device_update(device, &dscene, this);
 
   if (progress.get_cancel() || device->have_error())
     return;
@@ -293,7 +309,7 @@ void Scene::device_update(Device *device_, Progress &progress)
     return;
 
   progress.set_status("Updating Lookup Tables");
-  lookup_tables->device_update(device, &dscene);
+  lookup_tables->device_update(device, &dscene, this);
 
   if (progress.get_cancel() || device->have_error())
     return;
@@ -402,6 +418,13 @@ void Scene::collect_statistics(RenderStats *stats)
 {
   geometry_manager->collect_statistics(this, stats);
   image_manager->collect_statistics(stats);
+}
+
+void Scene::enable_update_stats()
+{
+  if (!update_stats) {
+    update_stats = new SceneUpdateStats();
+  }
 }
 
 DeviceRequestedFeatures Scene::get_requested_device_features()
@@ -680,6 +703,60 @@ template<> void Scene::delete_node_impl(ParticleSystem *node)
 }
 
 template<> void Scene::delete_node_impl(Shader * /*node*/)
+{
+  /* don't delete unused shaders, not supported */
+}
+
+template<typename T>
+static void remove_nodes_in_set(const set<T *> &nodes_set,
+                                vector<T *> &nodes_array,
+                                const NodeOwner *owner)
+{
+  size_t new_size = nodes_array.size();
+
+  for (size_t i = 0; i < new_size; ++i) {
+    T *node = nodes_array[i];
+
+    if (nodes_set.find(node) != nodes_set.end()) {
+      std::swap(nodes_array[i], nodes_array[new_size - 1]);
+
+      assert(node->get_owner() == owner);
+      delete node;
+
+      i -= 1;
+      new_size -= 1;
+    }
+  }
+
+  nodes_array.resize(new_size);
+  (void)owner;
+}
+
+template<> void Scene::delete_nodes(const set<Light *> &nodes, const NodeOwner *owner)
+{
+  remove_nodes_in_set(nodes, lights, owner);
+  light_manager->tag_update(this);
+}
+
+template<> void Scene::delete_nodes(const set<Geometry *> &nodes, const NodeOwner *owner)
+{
+  remove_nodes_in_set(nodes, geometry, owner);
+  geometry_manager->tag_update(this);
+}
+
+template<> void Scene::delete_nodes(const set<Object *> &nodes, const NodeOwner *owner)
+{
+  remove_nodes_in_set(nodes, objects, owner);
+  object_manager->tag_update(this);
+}
+
+template<> void Scene::delete_nodes(const set<ParticleSystem *> &nodes, const NodeOwner *owner)
+{
+  remove_nodes_in_set(nodes, particle_systems, owner);
+  particle_system_manager->tag_update(this);
+}
+
+template<> void Scene::delete_nodes(const set<Shader *> & /*nodes*/, const NodeOwner * /*owner*/)
 {
   /* don't delete unused shaders, not supported */
 }

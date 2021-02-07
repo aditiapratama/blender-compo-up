@@ -75,6 +75,13 @@ void OpenCLDevice::initialize()
                                        sizeof(m_max_group_dims),
                                        &m_max_group_dims,
                                        NULL));
+<<<<<<< HEAD
+=======
+    m_man.printIfError(clGetDeviceInfo(
+        m_device_id, CL_DEVICE_IMAGE2D_MAX_WIDTH, sizeof(m_max_img_w), &m_max_img_w, NULL));
+    m_man.printIfError(clGetDeviceInfo(
+        m_device_id, CL_DEVICE_IMAGE2D_MAX_HEIGHT, sizeof(m_max_img_h), &m_max_img_h, NULL));
+>>>>>>> upstream/compositor-up
 
     cl_device_type device_type = 0;
     m_man.printIfError(

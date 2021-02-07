@@ -2374,7 +2374,7 @@ static void node_composit_buts_bokehimage(uiLayout *layout, bContext *UNUSED(C),
 static void node_composit_buts_bokehblur(uiLayout *layout, bContext *UNUSED(C), PointerRNA *ptr)
 {
   uiItemR(layout, ptr, "use_variable_size", DEFAULT_FLAGS, NULL, ICON_NONE);
-  // uiItemR(layout, ptr, "f_stop", DEFAULT_FLAGS, NULL, ICON_NONE);  // UNUSED
+  // uiItemR(layout, ptr, "f_stop", DEFAULT_FLAGS, NULL, ICON_NONE); /* UNUSED */
   uiItemR(layout, ptr, "blur_max", DEFAULT_FLAGS, NULL, ICON_NONE);
   uiItemR(layout, ptr, "use_extended_bounds", DEFAULT_FLAGS, NULL, ICON_NONE);
 }
@@ -2737,6 +2737,43 @@ static void node_composit_buts_videoseq(uiLayout *layout, bContext *UNUSED(C), P
   uiItemR(layout, ptr, "channel", DEFAULT_FLAGS, NULL, ICON_NONE);
 }
 
+<<<<<<< HEAD
+=======
+static void node_composit_buts_camera(uiLayout *layout, bContext *C, PointerRNA *ptr)
+{
+  uiTemplateID(
+      layout, C, ptr, "camera", NULL, NULL, NULL, UI_TEMPLATE_ID_FILTER_AVAILABLE, false, NULL);
+  uiLayout *col = uiLayoutColumn(layout, true);
+  uiItemR(col, ptr, "draw_mode", DEFAULT_FLAGS, NULL, ICON_NONE);
+  uiItemR(col, ptr, "frame_offset", DEFAULT_FLAGS, NULL, ICON_NONE);
+}
+
+/*Experimental compositor-up */
+static void node_composit_buts_extend(uiLayout *layout, bContext *UNUSED(C), PointerRNA *ptr)
+{
+  uiItemR(layout, ptr, "extend_mode", DEFAULT_FLAGS, NULL, ICON_NONE);
+  uiItemR(layout, ptr, "add_extend_x", DEFAULT_FLAGS, NULL, ICON_NONE);
+  uiItemR(layout, ptr, "add_extend_y", DEFAULT_FLAGS, NULL, ICON_NONE);
+  uiItemR(layout, ptr, "scale", DEFAULT_FLAGS, NULL, ICON_NONE);
+}
+
+static void node_composit_buts_randomize(uiLayout *layout, bContext *UNUSED(C), PointerRNA *ptr)
+{
+  bNode *node = ptr->data;
+  NodeRandomize *data = node->storage;
+  uiItemR(layout, ptr, "use_seed", DEFAULT_FLAGS, NULL, ICON_NONE);
+  if (data->flag & CMP_NODEFLAG_RANDOMIZE_SEED) {
+    uiItemR(layout, ptr, "seed", DEFAULT_FLAGS, NULL, ICON_NONE);
+  }
+  uiItemR(layout, ptr, "min", DEFAULT_FLAGS, NULL, ICON_NONE);
+  uiItemR(layout, ptr, "max", DEFAULT_FLAGS, NULL, ICON_NONE);
+  uiItemR(layout, ptr, "variance_down", DEFAULT_FLAGS, NULL, ICON_NONE);
+  uiItemR(layout, ptr, "variance_up", DEFAULT_FLAGS, NULL, ICON_NONE);
+  uiItemR(layout, ptr, "variance_steps", DEFAULT_FLAGS, NULL, ICON_NONE);
+}
+/* END of Experimental compositor-up */
+
+>>>>>>> upstream/compositor-up
 /* only once called */
 static void node_composit_set_butfunc(bNodeType *ntype)
 {
@@ -2983,6 +3020,20 @@ static void node_composit_set_butfunc(bNodeType *ntype)
     case CMP_NODE_VIDEO_SEQ:
       ntype->draw_buttons = node_composit_buts_videoseq;
       break;
+<<<<<<< HEAD
+=======
+    case CMP_NODE_CAMERA:
+      ntype->draw_buttons = node_composit_buts_camera;
+      break;
+    /* Experimental compositor-up */
+    case CMP_NODE_EXTEND:
+      ntype->draw_buttons = node_composit_buts_extend;
+      break;
+    case CMP_NODE_RANDOMIZE:
+      ntype->draw_buttons = node_composit_buts_randomize;
+      break;
+      /* END of Experimental compositor-up */
+>>>>>>> upstream/compositor-up
   }
 }
 
@@ -3165,58 +3216,8 @@ static void node_texture_set_butfunc(bNodeType *ntype)
 
 /* ****************** BUTTON CALLBACKS FOR SIMULATION NODES ***************** */
 
-static void node_simulation_buts_particle_simulation(uiLayout *layout,
-                                                     bContext *UNUSED(C),
-                                                     PointerRNA *ptr)
+static void node_simulation_set_butfunc(bNodeType *UNUSED(ntype))
 {
-  uiItemR(layout, ptr, "name", DEFAULT_FLAGS, "", ICON_NONE);
-}
-
-static void node_simulation_buts_particle_time_step_event(uiLayout *layout,
-                                                          bContext *UNUSED(C),
-                                                          PointerRNA *ptr)
-{
-  uiItemR(layout, ptr, "mode", DEFAULT_FLAGS, "", ICON_NONE);
-}
-
-static void node_simulation_buts_particle_attribute(uiLayout *layout,
-                                                    bContext *UNUSED(C),
-                                                    PointerRNA *ptr)
-{
-  uiItemR(layout, ptr, "data_type", DEFAULT_FLAGS, "", ICON_NONE);
-}
-
-static void node_simulation_buts_set_particle_attribute(uiLayout *layout,
-                                                        bContext *UNUSED(C),
-                                                        PointerRNA *ptr)
-{
-  uiItemR(layout, ptr, "data_type", DEFAULT_FLAGS, "", ICON_NONE);
-}
-
-static void node_simulation_buts_time(uiLayout *layout, bContext *UNUSED(C), PointerRNA *ptr)
-{
-  uiItemR(layout, ptr, "mode", DEFAULT_FLAGS, "", ICON_NONE);
-}
-
-static void node_simulation_set_butfunc(bNodeType *ntype)
-{
-  switch (ntype->type) {
-    case SIM_NODE_PARTICLE_SIMULATION:
-      ntype->draw_buttons = node_simulation_buts_particle_simulation;
-      break;
-    case SIM_NODE_PARTICLE_TIME_STEP_EVENT:
-      ntype->draw_buttons = node_simulation_buts_particle_time_step_event;
-      break;
-    case SIM_NODE_PARTICLE_ATTRIBUTE:
-      ntype->draw_buttons = node_simulation_buts_particle_attribute;
-      break;
-    case SIM_NODE_SET_PARTICLE_ATTRIBUTE:
-      ntype->draw_buttons = node_simulation_buts_set_particle_attribute;
-      break;
-    case SIM_NODE_TIME:
-      ntype->draw_buttons = node_simulation_buts_time;
-      break;
-  }
 }
 
 /* ****************** BUTTON CALLBACKS FOR FUNCTION NODES ***************** */
@@ -3404,10 +3405,6 @@ static const float std_node_socket_colors[][4] = {
     {0.39, 0.39, 0.39, 1.0}, /* SOCK_STRING */
     {0.40, 0.10, 0.10, 1.0}, /* SOCK_OBJECT */
     {0.10, 0.40, 0.10, 1.0}, /* SOCK_IMAGE */
-    {0.80, 0.80, 0.20, 1.0}, /* SOCK_EMITTERS */
-    {0.80, 0.20, 0.80, 1.0}, /* SOCK_EVENTS */
-    {0.20, 0.80, 0.80, 1.0}, /* SOCK_FORCES */
-    {0.30, 0.30, 0.30, 1.0}, /* SOCK_CONTROL_FLOW */
 };
 
 /* common color callbacks for standard types */
@@ -4153,7 +4150,6 @@ void node_draw_link(View2D *v2d, SpaceNode *snode, bNodeLink *link)
   }
 
   node_draw_link_bezier(v2d, snode, link, th_col1, th_col2, th_col3);
-  //  node_draw_link_straight(v2d, snode, link, th_col1, do_shaded, th_col2, do_triple, th_col3);
 }
 
 void ED_node_draw_snap(View2D *v2d, const float cent[2], float size, NodeBorder border, uint pos)

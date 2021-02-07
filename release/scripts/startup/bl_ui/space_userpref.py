@@ -45,7 +45,9 @@ class USERPREF_HT_header(Header):
             # Show '*' to let users know the preferences have been modified.
             layout.operator(
                 "wm.save_userpref",
-                text="Save Preferences" + (" *" if prefs.is_dirty else ""),
+                text=iface_("Save Preferences") +
+                (" *" if prefs.is_dirty else ""),
+                translate=False,
             )
 
     def draw(self, context):
@@ -1082,8 +1084,13 @@ class USERPREF_PT_theme_collection_colors(ThemePanel, CenterAlignMixIn, Panel):
         flow = layout.grid_flow(
             row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
         for i, ui in enumerate(theme.collection_color, 1):
+<<<<<<< HEAD
             flow.prop(ui, "color", text=iface_(
                 f"Color {i:d}"), translate=False)
+=======
+            flow.prop(ui, "color", text=iface_("Color %d") %
+                      i, translate=False)
+>>>>>>> upstream/compositor-up
 
 
 # Base class for dynamically defined theme-space panels.
@@ -1817,6 +1824,7 @@ class USERPREF_PT_addons(AddOnPanel, Panel):
 
         layout = self.layout
 
+        wm = context.window_manager
         prefs = context.preferences
         used_ext = {ext.module for ext in prefs.addons}
 
@@ -1842,7 +1850,7 @@ class USERPREF_PT_addons(AddOnPanel, Panel):
         split = layout.split(factor=0.6)
 
         row = split.row()
-        row.prop(context.window_manager, "addon_support", expand=True)
+        row.prop(wm, "addon_support", expand=True)
 
         row = split.row(align=True)
         row.operator("preferences.addon_install",
@@ -1851,10 +1859,16 @@ class USERPREF_PT_addons(AddOnPanel, Panel):
                      icon='FILE_REFRESH', text="Refresh")
 
         row = layout.row()
+<<<<<<< HEAD
         row.prop(context.preferences.view, "show_addons_enabled_only")
         row.prop(context.window_manager, "addon_filter", text="")
         row.prop(context.window_manager, "addon_search",
                  text="", icon='VIEWZOOM')
+=======
+        row.prop(prefs.view, "show_addons_enabled_only")
+        row.prop(wm, "addon_filter", text="")
+        row.prop(wm, "addon_search", text="", icon='VIEWZOOM')
+>>>>>>> upstream/compositor-up
 
         col = layout.column()
 
@@ -1879,10 +1893,10 @@ class USERPREF_PT_addons(AddOnPanel, Panel):
                 "(see console for details)",
             )
 
-        show_enabled_only = context.preferences.view.show_addons_enabled_only
-        filter = context.window_manager.addon_filter
-        search = context.window_manager.addon_search.lower()
-        support = context.window_manager.addon_support
+        show_enabled_only = prefs.view.show_addons_enabled_only
+        filter = wm.addon_filter
+        search = wm.addon_search.lower()
+        support = wm.addon_support
 
         # initialized on demand
         user_addon_paths = []
@@ -2257,10 +2271,9 @@ class USERPREF_PT_experimental_new_features(ExperimentalPanel, Panel):
     def draw(self, context):
         self._draw_items(
             context, (
-                ({"property": "use_new_particle_system"}, "T73324"),
                 ({"property": "use_sculpt_vertex_colors"}, "T71947"),
-                ({"property": "use_tools_missing_icons"}, "T80331"),
                 ({"property": "use_switch_object_operator"}, "T80402"),
+                ({"property": "use_sculpt_tools_tilt"}, "T00000"),
             ),
         )
 
@@ -2272,6 +2285,8 @@ class USERPREF_PT_experimental_prototypes(ExperimentalPanel, Panel):
         self._draw_items(
             context, (
                 ({"property": "use_new_hair_type"}, "T68981"),
+                ({"property": "use_new_point_cloud_type"}, "T75717"),
+                ({"property": "use_new_geometry_nodes"}, "project/profile/121"),
             ),
         )
 
@@ -2290,7 +2305,6 @@ class USERPREF_PT_experimental_debugging(ExperimentalPanel, Panel):
             context, (
                 ({"property": "use_undo_legacy"}, "T60695"),
                 ({"property": "use_cycles_debug"}, None),
-                ({"property": "use_image_editor_legacy_drawing"}, "T67530"),
             ),
         )
 

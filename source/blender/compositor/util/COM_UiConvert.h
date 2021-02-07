@@ -18,10 +18,31 @@
 
 #pragma once
 
+<<<<<<< HEAD
+<<<<<<< HEAD:source/blender/compositor/util/COM_UiConvert.h
+=======
+>>>>>>> upstream/compositor-up
 #include "COM_Pixels.h"
 
 namespace UiConvert {
 
 PixelInterpolation pixelInterpolation(short ui_value);
+<<<<<<< HEAD
 
 };  // namespace UiConvert
+=======
+#include "COM_TransformOperation.h"
+
+class Stabilize2dOperation : public TransformOperation {
+ public:
+  Stabilize2dOperation();
+
+ protected:
+  virtual void hashParams() override;
+};
+>>>>>>> upstream/compositor-up:source/blender/compositor/operations/distort/COM_Stabilize2dOperation.h
+=======
+PixelExtend extendMode(short extend_mode);
+
+};  // namespace UiConvert
+>>>>>>> upstream/compositor-up

@@ -91,7 +91,7 @@ static int py_call_level = 0;
 /* Set by command line arguments before Python starts. */
 static bool py_use_system_env = false;
 
-// #define TIME_PY_RUN // simple python tests. prints on exit.
+// #define TIME_PY_RUN /* simple python tests. prints on exit. */
 
 #ifdef TIME_PY_RUN
 #  include "PIL_time.h"
@@ -111,8 +111,8 @@ void BPY_context_update(bContext *C)
     return;
   }
 
-  BPy_SetContext(C);
-  BPY_modules_update(C); /* can give really bad results if this isn't here */
+  BPY_context_set(C);
+  BPY_modules_update(); /* can give really bad results if this isn't here */
 }
 
 void bpy_context_set(bContext *C, PyGILState_STATE *gilstate)
@@ -155,7 +155,7 @@ void bpy_context_clear(bContext *UNUSED(C), const PyGILState_STATE *gilstate)
     /* XXX - Calling classes currently wont store the context :\,
      * cant set NULL because of this. but this is very flakey still. */
 #if 0
-    BPy_SetContext(NULL);
+    BPY_context_set(NULL);
 #endif
 
 #ifdef TIME_PY_RUN
@@ -224,7 +224,10 @@ void BPY_text_free_code(Text *text)
   }
 }
 
-void BPY_modules_update(bContext *C)
+/**
+ * Needed so the #Main pointer in `bpy.data` doesn't become out of date.
+ */
+void BPY_modules_update(void)
 {
 #if 0 /* slow, this runs all the time poll, draw etc 100's of time a sec. */
   PyObject *mod = PyImport_ImportModuleLevel("bpy", NULL, NULL, NULL, 0);
@@ -234,14 +237,16 @@ void BPY_modules_update(bContext *C)
 
   /* refreshes the main struct */
   BPY_update_rna_module();
-  if (bpy_context_module) {
-    bpy_context_module->ptr.data = (void *)C;
-  }
+}
+
+bContext *BPY_context_get(void)
+{
+  return bpy_context_module->ptr.data;
 }
 
 void BPY_context_set(bContext *C)
 {
-  BPy_SetContext(C);
+  bpy_context_module->ptr.data = (void *)C;
 }
 
 #ifdef WITH_FLUID
@@ -295,13 +300,17 @@ static struct _inittab bpy_internal_modules[] = {
 };
 
 /* call BPY_context_set first */
-void BPY_python_start(int argc, const char **argv)
+void BPY_python_start(bContext *C, int argc, const char **argv)
 {
 #ifndef WITH_PYTHON_MODULE
   PyThreadState *py_tstate = NULL;
   const char *py_path_bundle = BKE_appdir_folder_id(BLENDER_SYSTEM_PYTHON, NULL);
 
-  /* Not essential but nice to set our name. */
+  /* Needed for Python's initialization for portable Python installations.
+   * We could use #Py_SetPath, but this overrides Python's internal logic
+   * for calculating it's own module search paths.
+   *
+   * `sys.executable` is overwritten after initialization to the Python binary. */
   {
     const char *program_path = BKE_appdir_program_path();
     wchar_t program_path_wchar[FILE_MAX];
@@ -340,13 +349,32 @@ void BPY_python_start(int argc, const char **argv)
     int i;
     PyObject *py_argv = PyList_New(argc);
     for (i = 0; i < argc; i++) {
-      /* should fix bug #20021 - utf path name problems, by replacing
+      /* should fix bug T20021 - utf path name problems, by replacing
        * PyUnicode_FromString, with this one */
       PyList_SET_ITEM(py_argv, i, PyC_UnicodeFromByte(argv[i]));
     }
 
     PySys_SetObject("argv", py_argv);
     Py_DECREF(py_argv);
+  }
+
+  /* Setting the program name is important so the 'multiprocessing' module
+   * can launch new Python instances. */
+  {
+    const char *sys_variable = "executable";
+    char program_path[FILE_MAX];
+    if (BKE_appdir_program_python_search(
+            program_path, sizeof(program_path), PY_MAJOR_VERSION, PY_MINOR_VERSION)) {
+      PyObject *py_program_path = PyC_UnicodeFromByte(program_path);
+      PySys_SetObject(sys_variable, py_program_path);
+      Py_DECREF(py_program_path);
+    }
+    else {
+      fprintf(stderr,
+              "Unable to find the python binary, "
+              "the multiprocessing module may not be functional!\n");
+      PySys_SetObject(sys_variable, Py_None);
+    }
   }
 
 #  ifdef WITH_FLUID
@@ -387,7 +415,7 @@ void BPY_python_start(int argc, const char **argv)
 #endif
 
   /* bpy.* and lets us import it */
-  BPy_init_modules();
+  BPy_init_modules(C);
 
   pyrna_alloc_types();
 
@@ -665,7 +693,7 @@ static void bpy_module_delay_init(PyObject *bpy_proxy)
   const int argc = 1;
   const char *argv[2];
 
-  /* updating the module dict below will loose the reference to __file__ */
+  /* updating the module dict below will lose the reference to __file__ */
   PyObject *filename_obj = PyModule_GetFilenameObject(bpy_proxy);
 
   const char *filename_rel = _PyUnicode_AsString(filename_obj); /* can be relative */

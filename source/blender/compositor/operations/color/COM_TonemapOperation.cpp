@@ -175,7 +175,11 @@ void PhotoreceptorTonemapOperation::execPixels(ExecutionManager &man)
 
       COPY_COORDS(color, dst_coords);
 
+<<<<<<< HEAD
       READ_IMG(color, color_pix);
+=======
+      READ_IMG4(color, color_pix);
+>>>>>>> upstream/compositor-up
 
       const float alpha = color_pix.w;
 

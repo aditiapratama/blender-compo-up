@@ -31,6 +31,7 @@
 /* for FOREACH_NODETREE_BEGIN */
 #include "DNA_node_types.h"
 
+#include "BKE_node_camera_view.h"
 #include "RNA_types.h"
 
 #ifdef __cplusplus
@@ -41,6 +42,10 @@ extern "C" {
 #define MAX_SOCKET 512
 
 struct ARegion;
+struct BlendDataReader;
+struct BlendExpander;
+struct BlendLibReader;
+struct BlendWriter;
 struct ColorManagedDisplaySettings;
 struct ColorManagedViewSettings;
 struct FreestyleLineStyle;
@@ -73,10 +78,6 @@ struct bNodeTree;
 struct bNodeTreeExec;
 struct bNodeTreeType;
 struct uiLayout;
-struct BlendWriter;
-struct BlendDataReader;
-struct BlendLibReader;
-struct BlendExpander;
 
 /* -------------------------------------------------------------------- */
 /** \name Node Type Definitions
@@ -1195,6 +1196,14 @@ void ntreeGPUMaterialNodes(struct bNodeTree *localtree,
 #define CMP_NODE_DENOISE 324
 #define CMP_NODE_CACHE 325
 #define CMP_NODE_VIDEO_SEQ 326
+<<<<<<< HEAD
+=======
+#define CMP_NODE_CAMERA 327
+/* Experimental compositor-up */
+#define CMP_NODE_EXTEND 360
+#define CMP_NODE_RANDOMIZE 361
+/* END of Experimental compositor-up  */
+>>>>>>> upstream/compositor-up
 
 /* channel toggles */
 #define CMP_CHAN_RGB 1
@@ -1225,6 +1234,7 @@ void ntreeGPUMaterialNodes(struct bNodeTree *localtree,
 #define CMP_TRACKPOS_ABSOLUTE_FRAME 3
 
 /* API */
+<<<<<<< HEAD
 void ntreeCompositExecTree(struct Main *main,
                            struct Depsgraph *depsgraph,
                            struct Scene *scene,
@@ -1236,6 +1246,28 @@ void ntreeCompositExecTree(struct Main *main,
                            const struct ColorManagedViewSettings *view_settings,
                            const struct ColorManagedDisplaySettings *display_settings,
                            const char *view_name);
+=======
+typedef struct CompositTreeExec {
+  struct Main *main;
+  struct Depsgraph *depsgraph;
+  struct Scene *scene;
+  ViewLayer *view_layer;
+  struct bNodeTree *ntree;
+  struct RenderData *rd;
+  int rendering;
+  int do_previews;
+  const struct ColorManagedViewSettings *view_settings;
+  const struct ColorManagedDisplaySettings *display_settings;
+  /* active rendering view name */
+  const char *viewname;
+
+  NodeCameraDrawView camera_draw_fn;
+  /* Only used for node camera view draw function */
+  struct NodeCameraJobContext *job_context;
+
+} CompositTreeExec;
+void ntreeCompositExecTree(struct CompositTreeExec *exec_data);
+>>>>>>> upstream/compositor-up
 void ntreeCompositTagRender(struct Scene *scene);
 void ntreeCompositUpdateRLayers(struct bNodeTree *ntree);
 void ntreeCompositRegisterPass(struct bNodeTree *ntree,
@@ -1317,7 +1349,7 @@ struct bNodeTreeExec *ntreeTexBeginExecTree(struct bNodeTree *ntree);
 void ntreeTexEndExecTree(struct bNodeTreeExec *exec);
 int ntreeTexExecTree(struct bNodeTree *ntree,
                      struct TexResult *target,
-                     float co[3],
+                     const float co[3],
                      float dxt[3],
                      float dyt[3],
                      int osatex,
@@ -1327,27 +1359,6 @@ int ntreeTexExecTree(struct bNodeTree *ntree,
                      int cfra,
                      int preview,
                      struct MTex *mtex);
-/** \} */
-
-/* -------------------------------------------------------------------- */
-/** \name Simulation Nodes
- * \{ */
-
-#define SIM_NODE_PARTICLE_SIMULATION 1000
-#define SIM_NODE_FORCE 1001
-#define SIM_NODE_SET_PARTICLE_ATTRIBUTE 1002
-#define SIM_NODE_PARTICLE_BIRTH_EVENT 1003
-#define SIM_NODE_PARTICLE_TIME_STEP_EVENT 1004
-#define SIM_NODE_EXECUTE_CONDITION 1005
-#define SIM_NODE_MULTI_EXECUTE 1006
-#define SIM_NODE_PARTICLE_MESH_EMITTER 1007
-#define SIM_NODE_PARTICLE_MESH_COLLISION_EVENT 1008
-#define SIM_NODE_EMIT_PARTICLES 1009
-#define SIM_NODE_TIME 1010
-#define SIM_NODE_PARTICLE_ATTRIBUTE 1011
-#define SIM_NODE_AGE_REACHED_EVENT 1012
-#define SIM_NODE_KILL_PARTICLE 1013
-
 /** \} */
 
 /* -------------------------------------------------------------------- */

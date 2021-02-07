@@ -26,5 +26,9 @@
 class CacheNode : public Node {
  public:
   CacheNode(bNode *editorNode);
+<<<<<<< HEAD
   void convertToOperations(NodeConverter &converter, const CompositorContext &context) const;
+=======
+  void convertToOperations(NodeConverter &converter, CompositorContext &context) const;
+>>>>>>> upstream/compositor-up
 };

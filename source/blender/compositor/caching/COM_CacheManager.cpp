@@ -93,12 +93,21 @@ PersistentKey CacheManager::buildPersistentKey(NodeOperation *op)
   pkey.op_data_type = op->getOutputDataType();
 
   pkey.hash = std::hash<int>()(pkey.n_frame);
+<<<<<<< HEAD
   MathUtil::hashCombine(pkey.hash, pkey.node_id);
   MathUtil::hashCombine(pkey.hash, pkey.op_width);
   MathUtil::hashCombine(pkey.hash, pkey.op_height);
   MathUtil::hashCombine(pkey.hash, (int)pkey.op_data_type);
 
   return std::move(pkey);
+=======
+  MathUtil::hashCombine(pkey.hash, std::hash<unsigned int>()(pkey.node_id));
+  MathUtil::hashCombine(pkey.hash, std::hash<int>()(pkey.op_width));
+  MathUtil::hashCombine(pkey.hash, std::hash<int>()(pkey.op_height));
+  MathUtil::hashCombine(pkey.hash, std::hash<int>()((int)pkey.op_data_type));
+
+  return pkey;
+>>>>>>> upstream/compositor-up
 }
 
 std::pair<bool, OpKey> CacheManager::checkPersistentOpKey(NodeOperation *op)

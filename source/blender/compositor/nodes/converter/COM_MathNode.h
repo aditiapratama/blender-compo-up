@@ -29,6 +29,10 @@ class MathNode : public Node {
   MathNode(bNode *editorNode) : Node(editorNode)
   {
   }
+<<<<<<< HEAD:source/blender/compositor/nodes/converter/COM_MathNode.h
   void convertToOperations(NodeConverter &converter,
                            const CompositorContext &context) const override;
+=======
+  void convertToOperations(NodeConverter &converter, CompositorContext &context) const override;
+>>>>>>> upstream/compositor-up:source/blender/compositor/nodes/COM_MathNode.h
 };

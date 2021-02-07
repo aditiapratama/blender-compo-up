@@ -18,6 +18,7 @@
 
 #include "BLI_assert.h"
 #include "BLI_path_util.h"
+<<<<<<< HEAD
 #include <chrono>
 #include <cstring>
 #ifdef __APPLE__
@@ -25,6 +26,11 @@
 #else
 #  include <filesystem>
 #endif
+=======
+#include <boost/filesystem.hpp> /* Do not use std::filesystem, is not supported by current minimum MAC version */
+#include <chrono>
+#include <cstring>
+>>>>>>> upstream/compositor-up
 #include <fstream>
 
 #include "COM_BufferUtil.h"
@@ -35,7 +41,11 @@
 
 const char FILENAME_PARTS_DELIMITER = '_';
 
+<<<<<<< HEAD
 namespace fs = std::filesystem;
+=======
+namespace fs = boost::filesystem;
+>>>>>>> upstream/compositor-up
 DiskCache::DiskCache(size_t op_type_hash)
     : BaseCache(op_type_hash),
       m_cache_dir_path(""),
@@ -123,7 +133,11 @@ void DiskCache::deleteAllCaches()
     joinAllThreads();
     try {
       if (fs::exists(m_cache_dir_path)) {
+<<<<<<< HEAD
         std::filesystem::remove_all(m_cache_dir_path);
+=======
+        fs::remove_all(m_cache_dir_path);
+>>>>>>> upstream/compositor-up
       }
     }
     catch (const std::exception &exc) {
@@ -223,7 +237,11 @@ void DiskCache::deleteCache(const CacheInfo *info)
     BLI_assert(fs::exists(file_path));
     std::function task = [=]() {
       try {
+<<<<<<< HEAD
         std::filesystem::remove(file_path);
+=======
+        fs::remove(file_path);
+>>>>>>> upstream/compositor-up
       }
       catch (const std::exception &exc) {
         printException("Error deleting compositor disk cache file \"" + file_path + "\": ", exc);

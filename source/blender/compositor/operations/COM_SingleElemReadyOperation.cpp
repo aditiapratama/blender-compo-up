@@ -16,6 +16,10 @@
  * Copyright 2011, Blender Foundation.
  */
 
+<<<<<<< HEAD
+<<<<<<< HEAD:source/blender/compositor/operations/COM_SingleElemReadyOperation.cpp
+=======
+>>>>>>> upstream/compositor-up
 #include "COM_SingleElemReadyOperation.h"
 #include "COM_BufferUtil.h"
 
@@ -37,4 +41,23 @@ float *SingleElemReadyOperation::getSingleElem(ExecutionManager &man)
 {
   BLI_assert(isSingleElem());
   return getSinglePixel(this, man, 0, 0, false);
+<<<<<<< HEAD
+=======
+#include "COM_GaussianBlurBaseOperation.h"
+
+GaussianBlurBaseOperation::GaussianBlurBaseOperation(SocketType socket_type)
+    : BlurBaseOperation(socket_type)
+{
+  this->m_falloff = -1; /* intentionally invalid, so we can detect uninitialized values */
+  this->m_do_subtract = false;
+}
+
+void GaussianBlurBaseOperation::hashParams()
+{
+  BlurBaseOperation::hashParams();
+  hashParam(m_falloff);
+  hashParam(m_do_subtract);
+>>>>>>> upstream/compositor-up:source/blender/compositor/operations/filter/COM_GaussianBlurBaseOperation.cpp
+=======
+>>>>>>> upstream/compositor-up
 }

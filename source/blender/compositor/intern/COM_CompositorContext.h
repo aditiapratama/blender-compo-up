@@ -18,29 +18,36 @@
 
 #pragma once
 
+<<<<<<< HEAD
 #ifdef WITH_CXX_GUARDEDALLOC
 #  include "MEM_guardedalloc.h"
 #endif
 
 #include "COM_Pixels.h"
 #include "COM_defines.h"
+=======
+#include <string>
+#include <vector>
+
+#include "BKE_node.h"
+>>>>>>> upstream/compositor-up
 #include "DNA_color_types.h"
 #include "DNA_node_types.h"
 #include "DNA_scene_types.h"
-#include <string>
-#include <vector>
+#ifdef WITH_CXX_GUARDEDALLOC
+#  include "MEM_guardedalloc.h"
+#endif
+
+#include "COM_Pixels.h"
+#include "COM_Renderer.h"
+#include "COM_defines.h"
 
 /**
  * \brief Overall context of the compositor
  */
 class CompositorContext {
  private:
-  /**
-   * \brief The rendering field describes if we are rendering (F12) or if we are editing (Node
-   * editor) This field is initialized in ExecutionSystem and must only be read from that point on.
-   * \see ExecutionSystem
-   */
-  bool m_rendering;
+  struct CompositTreeExec *m_exec_data;
 
   /**
    * \brief The quality of the composite.
@@ -49,6 +56,7 @@ class CompositorContext {
    */
   CompositorQuality m_quality;
 
+<<<<<<< HEAD
   struct Main *m_main;
   struct Depsgraph *m_depsgraph;
   ViewLayer *m_view_layer;
@@ -68,20 +76,32 @@ class CompositorContext {
    */
   bNodeTree *m_bnodetree;
 
+=======
+>>>>>>> upstream/compositor-up
   /**
    * \brief Preview image hash table
    * This field is initialized in ExecutionSystem and must only be read from that point on.
    */
   bNodeInstanceHash *m_previews;
 
+<<<<<<< HEAD
   /* \brief color management settings */
   const ColorManagedViewSettings *m_viewSettings;
   const ColorManagedDisplaySettings *m_displaySettings;
+=======
+  std::string m_execution_id;
 
-  /**
-   * \brief active rendering view name
-   */
-  const char *m_viewName;
+  int m_cpu_work_threads;
+
+  float m_inputs_scale;
+  uint64_t m_max_mem_cache_bytes;
+  uint64_t m_max_disk_cache_bytes;
+  const char *m_disk_cache_dir;
+  bool m_use_disk_cache;
+>>>>>>> upstream/compositor-up
+
+ private:
+  CompositorContext();
 
   std::string m_execution_id;
 
@@ -101,6 +121,7 @@ class CompositorContext {
    * \brief constructor initializes the context with default values.
    */
   static CompositorContext build(const std::string &execution_id,
+<<<<<<< HEAD
                                  struct Main *main,
                                  struct Depsgraph *depsgraph,
                                  RenderData *rd,
@@ -195,10 +216,73 @@ class CompositorContext {
   }
 
   const RenderData *getRenderData() const
+=======
+                                 struct CompositTreeExec *exec_data);
+
+  void initialize();
+  void deinitialize();
+
+  struct Main *getMain() const
   {
-    return this->m_rd;
+    return m_exec_data->main;
+  }
+  struct Depsgraph *getDepsgraph() const
+  {
+    return m_exec_data->depsgraph;
+  }
+  ViewLayer *getViewLayer() const
+  {
+    return m_exec_data->view_layer;
+  }
+  CompositTreeExec *getTreeExecData()
+  {
+    return m_exec_data;
+  }
+  PixelsSampler getDefaultSampler() const
+  {
+    return PixelsSampler{PixelInterpolation::BILINEAR, PixelExtend::CLIP};
   }
 
+  PixelsSampler getViewsSampler() const
+  {
+    return PixelsSampler{PixelInterpolation::NEAREST, PixelExtend::CLIP};
+  }
+
+  int getMaxImgW() const;
+  int getMaxImgH() const;
+
+  // Is video sequencer activated in the post-processing pipeline
+  bool isVseSequencerPassOn() const
+  {
+    return (m_exec_data->scene->r.scemode & R_DOSEQ);
+  }
+
+  bool isBreaked() const;
+  void updateDraw() const;
+
+  int getPreviewSize() const;
+
+  float getInputsScale() const
+  {
+    return m_exec_data->ntree->inputs_scale;
+  }
+
+  int getNCpuWorkThreads() const
+  {
+    return m_cpu_work_threads;
+  }
+  void setNCpuWorkThreads(int n_threads)
+  {
+    m_cpu_work_threads = n_threads;
+  }
+
+  std::string getExecutionId() const
+>>>>>>> upstream/compositor-up
+  {
+    return m_execution_id;
+  }
+
+<<<<<<< HEAD
   int getRenderWidth() const
   {
     return m_rd->xsch;
@@ -224,6 +308,85 @@ class CompositorContext {
   bNodeInstanceHash *getPreviewHash() const
   {
     return this->m_previews;
+=======
+  void setMemCacheBytes(size_t bytes)
+  {
+    m_max_mem_cache_bytes = bytes;
+  }
+
+  size_t getMemCacheBytes() const
+  {
+    return m_max_mem_cache_bytes;
+  }
+
+  size_t getDiskCacheBytes() const
+  {
+    return useDiskCache() ? m_max_disk_cache_bytes : 0;
+  }
+
+  bool useDiskCache() const
+  {
+    return m_use_disk_cache;
+  }
+
+  const char *getDiskCacheDir() const
+  {
+    return m_disk_cache_dir;
+>>>>>>> upstream/compositor-up
+  }
+
+  bool isRendering() const
+  {
+    return m_exec_data->rendering;
+  }
+
+<<<<<<< HEAD
+  /**
+   * \brief get display settings of color color management
+   */
+  const ColorManagedDisplaySettings *getDisplaySettings() const
+=======
+  const RenderData *getRenderData() const
+  {
+    return m_exec_data->rd;
+  }
+
+  int getRenderWidth() const
+>>>>>>> upstream/compositor-up
+  {
+    return m_exec_data->rd->xsch;
+  }
+  int getRenderHeight() const
+  {
+    return m_exec_data->rd->ysch;
+  }
+
+<<<<<<< HEAD
+  /**
+   * \brief get the quality
+   */
+  CompositorQuality getQuality() const
+=======
+  bNodeTree *getbNodeTree() const
+  {
+    return this->m_exec_data->ntree;
+  }
+
+  Scene *getScene() const
+>>>>>>> upstream/compositor-up
+  {
+    return m_exec_data->scene;
+  }
+
+  /**
+   * \brief get the preview image hash table
+   */
+<<<<<<< HEAD
+  int getCurrentFrame() const;
+=======
+  bNodeInstanceHash *getPreviewsHashTable() const
+  {
+    return this->m_previews;
   }
 
   /**
@@ -231,7 +394,7 @@ class CompositorContext {
    */
   const ColorManagedViewSettings *getViewSettings() const
   {
-    return this->m_viewSettings;
+    return m_exec_data->view_settings;
   }
 
   /**
@@ -239,8 +402,9 @@ class CompositorContext {
    */
   const ColorManagedDisplaySettings *getDisplaySettings() const
   {
-    return this->m_displaySettings;
+    return m_exec_data->display_settings;
   }
+>>>>>>> upstream/compositor-up
 
   /**
    * \brief get the quality
@@ -250,6 +414,8 @@ class CompositorContext {
     return this->m_quality;
   }
 
+<<<<<<< HEAD
+=======
   /**
    * \brief get the current frame-number of the scene in this context
    */
@@ -260,9 +426,10 @@ class CompositorContext {
    */
   const char *getViewName() const
   {
-    return this->m_viewName;
+    return m_exec_data->viewname;
   }
 
+>>>>>>> upstream/compositor-up
 #ifdef WITH_CXX_GUARDEDALLOC
   MEM_CXX_CLASS_ALLOC_FUNCS("COM:CompositorContext")
 #endif

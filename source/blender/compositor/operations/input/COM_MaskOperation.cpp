@@ -17,6 +17,10 @@
  */
 #include <cstring>
 
+<<<<<<< HEAD:source/blender/compositor/operations/input/COM_MaskOperation.cpp
+=======
+#include "BKE_lib_id.h"
+>>>>>>> upstream/compositor-up:source/blender/compositor/operations/COM_MaskOperation.cpp
 #include "BKE_mask.h"
 #include "BLI_listbase.h"
 #include "COM_MaskOperation.h"
@@ -58,9 +62,8 @@ void MaskOperation::initExecution()
       const float frame_step = (this->m_frame_shutter * 2.0f) / this->m_rasterMaskHandleTot;
       float frame_iter = frame;
 
-      Mask *mask_temp;
-
-      mask_temp = BKE_mask_copy_nolib(this->m_mask);
+      Mask *mask_temp = (Mask *)BKE_id_copy_ex(
+          NULL, &this->m_mask->id, NULL, LIB_ID_COPY_LOCALIZE | LIB_ID_COPY_NO_ANIMDATA);
 
       /* trick so we can get unkeyed edits to display */
       {
@@ -91,8 +94,7 @@ void MaskOperation::initExecution()
         frame_iter += frame_step;
       }
 
-      BKE_mask_free(mask_temp);
-      MEM_freeN(mask_temp);
+      BKE_id_free(NULL, &mask_temp->id);
     }
   }
   NodeOperation::initExecution();
@@ -106,6 +108,7 @@ void MaskOperation::deinitExecution()
       this->m_rasterMaskHandles[i] = NULL;
     }
   }
+  NodeOperation::deinitExecution();
 }
 
 ResolutionType MaskOperation::determineResolution(int resolution[2],

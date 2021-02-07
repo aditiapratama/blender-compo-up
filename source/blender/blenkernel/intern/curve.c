@@ -21,7 +21,7 @@
  * \ingroup bke
  */
 
-#include <math.h>  // floor
+#include <math.h> /* floor */
 #include <stdlib.h>
 #include <string.h>
 
@@ -282,7 +282,7 @@ static void curve_blend_read_lib(BlendLibReader *reader, ID *id)
   BLO_read_id_address(reader, cu->id.lib, &cu->vfonti);
   BLO_read_id_address(reader, cu->id.lib, &cu->vfontbi);
 
-  BLO_read_id_address(reader, cu->id.lib, &cu->ipo);  // XXX deprecated - old animation system
+  BLO_read_id_address(reader, cu->id.lib, &cu->ipo); /* XXX deprecated - old animation system */
   BLO_read_id_address(reader, cu->id.lib, &cu->key);
 }
 
@@ -298,7 +298,7 @@ static void curve_blend_read_expand(BlendExpander *expander, ID *id)
   BLO_expand(expander, cu->vfonti);
   BLO_expand(expander, cu->vfontbi);
   BLO_expand(expander, cu->key);
-  BLO_expand(expander, cu->ipo);  // XXX deprecated - old animation system
+  BLO_expand(expander, cu->ipo); /* XXX deprecated - old animation system */
   BLO_expand(expander, cu->bevobj);
   BLO_expand(expander, cu->taperobj);
   BLO_expand(expander, cu->textoncurve);
@@ -418,18 +418,12 @@ Curve *BKE_curve_add(Main *bmain, const char *name, int type)
 {
   Curve *cu;
 
+  /* We cannot use #BKE_id_new here as we need some custom initialization code. */
   cu = BKE_libblock_alloc(bmain, ID_CU, name, 0);
 
   BKE_curve_init(cu, type);
 
   return cu;
-}
-
-Curve *BKE_curve_copy(Main *bmain, const Curve *cu)
-{
-  Curve *cu_copy;
-  BKE_id_copy(bmain, &cu->id, (ID **)&cu_copy);
-  return cu_copy;
 }
 
 /* Get list of nurbs from editnurbs structure */
@@ -2208,6 +2202,22 @@ static void bevel_list_calc_bisect(BevList *bl)
     bevp1 = bevp2;
     bevp2++;
   }
+
+  if (is_cyclic == false) {
+    bevp0 = &bl->bevpoints[0];
+    bevp1 = &bl->bevpoints[1];
+    sub_v3_v3v3(bevp0->dir, bevp1->vec, bevp0->vec);
+    if (normalize_v3(bevp0->dir) == 0.0f) {
+      copy_v3_v3(bevp0->dir, bevp1->dir);
+    }
+
+    bevp0 = &bl->bevpoints[bl->nr - 2];
+    bevp1 = &bl->bevpoints[bl->nr - 1];
+    sub_v3_v3v3(bevp1->dir, bevp1->vec, bevp0->vec);
+    if (normalize_v3(bevp1->dir) == 0.0f) {
+      copy_v3_v3(bevp1->dir, bevp0->dir);
+    }
+  }
 }
 static void bevel_list_flip_tangents(BevList *bl)
 {
@@ -2426,7 +2436,7 @@ static void make_bevel_list_3D_minimum_twist(BevList *bl)
   else {
     /* Need to correct quat for the first/last point,
      * this is so because previously it was only calculated
-     * using it's own direction, which might not correspond
+     * using its own direction, which might not correspond
      * the twist of neighbor point.
      */
     bevp1 = bl->bevpoints;
@@ -2998,6 +3008,8 @@ void BKE_curve_bevelList_make(Object *ob, ListBase *nurbs, bool for_render)
   bl = bev->first;
   while (bl) {
     if (bl->nr) { /* null bevel items come from single points */
+      /* Scale the threshold so high resolution shapes don't get over reduced, see: T49850. */
+      const float threshold_resolu = 0.00001f / resolu;
       bool is_cyclic = bl->poly != -1;
       nr = bl->nr;
       if (is_cyclic) {
@@ -3018,13 +3030,9 @@ void BKE_curve_bevelList_make(Object *ob, ListBase *nurbs, bool for_render)
           }
         }
         else {
-          if (fabsf(bevp0->vec[0] - bevp1->vec[0]) < 0.00001f) {
-            if (fabsf(bevp0->vec[1] - bevp1->vec[1]) < 0.00001f) {
-              if (fabsf(bevp0->vec[2] - bevp1->vec[2]) < 0.00001f) {
-                bevp0->dupe_tag = true;
-                bl->dupe_nr++;
-              }
-            }
+          if (compare_v3v3(bevp0->vec, bevp1->vec, threshold_resolu)) {
+            bevp0->dupe_tag = true;
+            bl->dupe_nr++;
           }
         }
         bevp0 = bevp1;
@@ -3645,7 +3653,7 @@ static bool tridiagonal_solve_with_limits(float *a,
      * see if it may be a good idea to unlock some handles. */
     if (!locked) {
       for (int i = 0; i < solve_count; i++) {
-        // to definitely avoid infinite loops limit this to 2 times
+        /* to definitely avoid infinite loops limit this to 2 times */
         if (!is_locked[i] || num_unlocks[i] >= 2) {
           continue;
         }
@@ -4612,7 +4620,7 @@ void BKE_nurb_direction_switch(Nurb *nu)
       bp2--;
     }
     /* If there are odd number of points no need to touch coord of middle one,
-     * but still need to change it's tilt.
+     * but still need to change its tilt.
      */
     if (nu->pntsu & 1) {
       bp1->tilt = -bp1->tilt;
@@ -5570,6 +5578,47 @@ void BKE_curve_rect_from_textbox(const struct Curve *cu,
 
   r_rect->xmax = r_rect->xmin + tb->w;
   r_rect->ymin = r_rect->ymax - tb->h;
+}
+
+/* This function is almost the same as BKE_fcurve_correct_bezpart(), but doesn't allow as large a
+ * tangent. */
+void BKE_curve_correct_bezpart(const float v1[2], float v2[2], float v3[2], const float v4[2])
+{
+  float h1[2], h2[2], len1, len2, len, fac;
+
+  /* Calculate handle deltas. */
+  h1[0] = v1[0] - v2[0];
+  h1[1] = v1[1] - v2[1];
+
+  h2[0] = v4[0] - v3[0];
+  h2[1] = v4[1] - v3[1];
+
+  /* Calculate distances:
+   * - len  = span of time between keyframes
+   * - len1 = length of handle of start key
+   * - len2 = length of handle of end key
+   */
+  len = v4[0] - v1[0];
+  len1 = fabsf(h1[0]);
+  len2 = fabsf(h2[0]);
+
+  /* If the handles have no length, no need to do any corrections. */
+  if ((len1 + len2) == 0.0f) {
+    return;
+  }
+
+  /* the two handles cross over each other, so force them
+   * apart using the proportion they overlap
+   */
+  if ((len1 + len2) > len) {
+    fac = len / (len1 + len2);
+
+    v2[0] = (v1[0] - fac * h1[0]);
+    v2[1] = (v1[1] - fac * h1[1]);
+
+    v3[0] = (v4[0] - fac * h2[0]);
+    v3[1] = (v4[1] - fac * h2[1]);
+  }
 }
 
 /* **** Depsgraph evaluation **** */

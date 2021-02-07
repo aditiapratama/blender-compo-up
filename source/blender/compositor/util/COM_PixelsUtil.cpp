@@ -16,6 +16,7 @@
  * Copyright 2020, Blender Foundation.
  */
 
+<<<<<<< HEAD
 #include "COM_PixelsUtil.h"
 #include "BLI_assert.h"
 #include "COM_Bmp.h"
@@ -28,6 +29,25 @@
 #include "COM_kernel_cpu.h"
 #include "IMB_imbuf_types.h"
 #include <string.h>
+=======
+#include "BKE_image.h"
+#include "BLI_assert.h"
+#include "IMB_imbuf.h"
+#include "IMB_imbuf_types.h"
+#include "MEM_guardedalloc.h"
+#include <string.h>
+
+#include "COM_Buffer.h"
+#include "COM_BufferUtil.h"
+#include "COM_ExecutionManager.h"
+#include "COM_GlobalManager.h"
+#include "COM_NodeOperation.h"
+#include "COM_PixelsUtil.h"
+#include "COM_Rect.h"
+#include "COM_defines.h"
+
+#include "COM_kernel_cpu.h"
+>>>>>>> upstream/compositor-up
 
 int PixelsUtil::getNUsedChannels(DataType dataType)
 {
@@ -162,16 +182,26 @@ void PixelsUtil::copyBufferRectChannel(
   unsigned char *read_buf_cur = read_buf + dst.ymin * buf_brow_chs + dst.xmin * n_read_buf_chs +
                                 from_ch_idx;
 
+<<<<<<< HEAD
   float *dst_row_end = dst_img.start + dst_img.row_chs;
   while (dst_cur < dst_img.end) {
     while (dst_cur < dst_row_end) {
+=======
+  float *dst_brow_end = dst_img.start + dst_img.brow_chs;
+  while (dst_cur < dst_img.end) {
+    while (dst_cur < dst_brow_end) {
+>>>>>>> upstream/compositor-up
       *dst_cur = *read_buf_cur * norm_mult;
 
       dst_cur += dst_img.belem_chs;
       read_buf_cur += n_read_buf_chs;
     }
     dst_cur += dst_img.row_jump;
+<<<<<<< HEAD
     dst_row_end += dst_img.brow_chs_incr;
+=======
+    dst_brow_end += dst_img.brow_chs_incr;
+>>>>>>> upstream/compositor-up
   }
 }
 
@@ -186,7 +216,23 @@ bool PixelsUtil::copyImBufRect(PixelsRect &dst, ImBuf *imbuf, int n_used_chs, in
     return false;
   }
   else {
+<<<<<<< HEAD
     copyBufferRect(dst, (unsigned char *)imbuf->rect, n_used_chs, n_read_buf_chs);
+=======
+    // if (n_used_chs == 4) {
+    //  int w = dst.getWidth();
+    //  int h = dst.getHeight();
+    //  PixelsImg dst_img = dst.pixelsImg();
+    //  unsigned char *imbuf_start = ((unsigned char *)imbuf->rect) + dst.ymin * w * 4 +
+    //                               dst.xmin * 4;
+    //  IMB_buffer_float_from_byte(
+    //      dst_img.start, imbuf_start, IB_PROFILE_SRGB, IB_PROFILE_SRGB, false, w, h, w, w);
+    //}
+    // else {
+    copyBufferRect(dst, (unsigned char *)imbuf->rect, n_used_chs, n_read_buf_chs);
+    //}
+
+>>>>>>> upstream/compositor-up
     return true;
   }
 }
@@ -403,7 +449,10 @@ void PixelsUtil::setRectElem(PixelsRect &wr1, const float *elem, int n_channels)
 }
 
 #if defined(COM_DEBUG) || defined(DEBUG)
+<<<<<<< HEAD
 
+=======
+>>>>>>> upstream/compositor-up
 void PixelsUtil::saveAsImage(TmpBuffer *buf, std::string filename)
 {
   PixelsRect rect(buf, 0, buf->width, 0, buf->height);
@@ -428,13 +477,41 @@ void PixelsUtil::saveAsImage(PixelsRect &rect, std::string filename)
     ExecutionManager::deviceWaitQueueToFinish();
   }
 
+<<<<<<< HEAD
   return COM_Bmp::generateBitmapImage(rect, filename);
+=======
+  // remove any buffer padding
+  PixelsRect no_paddings_rect = rect.duplicate();
+  ImageFormatData *format = (ImageFormatData *)MEM_mallocN(sizeof(ImageFormatData),
+                                                           "PixelsUtil::saveAsImage");
+  BKE_imformat_defaults(format);
+  ImBuf *imbuf = IMB_allocFromBuffer(nullptr,
+                                     no_paddings_rect.tmp_buffer->host.buffer,
+                                     no_paddings_rect.getWidth(),
+                                     no_paddings_rect.getHeight(),
+                                     no_paddings_rect.getElemChs());
+  BKE_imbuf_write(imbuf, (filename + ".png").c_str(), format);
+  MEM_freeN(format);
+  IMB_freeImBuf(imbuf);
+  GlobalMan->BufferMan->recycler()->giveRecycle(no_paddings_rect.tmp_buffer);
+>>>>>>> upstream/compositor-up
 }
 
 void PixelsUtil::saveAsImage(
     const unsigned char *img_buffer, int width, int height, int n_channels, std::string filename)
 {
+<<<<<<< HEAD
   return COM_Bmp::generateBitmapImage(img_buffer, width, height, n_channels, filename);
+=======
+  ImageFormatData *format = (ImageFormatData *)MEM_mallocN(sizeof(ImageFormatData),
+                                                           "PixelsUtil::saveAsImage");
+  BKE_imformat_defaults(format);
+  ImBuf *imbuf = IMB_allocFromBuffer(
+      (unsigned int *)img_buffer, nullptr, width, height, n_channels);
+  BKE_imbuf_write(imbuf, (filename + ".png").c_str(), format);
+  MEM_freeN(format);
+  IMB_freeImBuf(imbuf);
+>>>>>>> upstream/compositor-up
 }
 
 #endif

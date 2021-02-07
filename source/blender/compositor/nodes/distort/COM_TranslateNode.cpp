@@ -26,7 +26,11 @@ TranslateNode::TranslateNode(bNode *editorNode) : Node(editorNode)
 }
 
 void TranslateNode::convertToOperations(NodeConverter &converter,
+<<<<<<< HEAD:source/blender/compositor/nodes/distort/COM_TranslateNode.cpp
                                         const CompositorContext & /*context*/) const
+=======
+                                        CompositorContext & /*context*/) const
+>>>>>>> upstream/compositor-up:source/blender/compositor/nodes/COM_TranslateNode.cpp
 {
   bNode *bnode = this->getbNode();
   NodeTranslateData *data = (NodeTranslateData *)bnode->storage;

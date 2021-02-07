@@ -16,6 +16,7 @@
  * Copyright 2011, Blender Foundation.
  */
 
+<<<<<<< HEAD:source/blender/compositor/operations/filter/COM_GlareFogGlowOperation.cpp
 #include "COM_GlareFogGlowOperation.h"
 #include "BLI_math.h"
 #include "COM_GlobalManager.h"
@@ -25,6 +26,18 @@
 #include "COM_kernel_cpu.h"
 
 #include <math.h>
+=======
+#include <math.h>
+
+#include "BLI_math.h"
+#include "MEM_guardedalloc.h"
+
+#include "COM_GlareFogGlowOperation.h"
+#include "COM_GlobalManager.h"
+#include "COM_PixelsUtil.h"
+
+#include "COM_kernel_cpu.h"
+>>>>>>> upstream/compositor-up:source/blender/compositor/operations/COM_GlareFogGlowOperation.cpp
 
 /*
  *  2D Fast Hartley Transform, used for convolution
@@ -32,7 +45,7 @@
 
 typedef float fREAL;
 
-// returns next highest power of 2 of x, as well it's log2 in L2
+// returns next highest power of 2 of x, as well its log2 in L2
 static unsigned int nextPow2(unsigned int x, unsigned int *L2)
 {
   unsigned int pw, x_notpow2 = x & (x - 1);

@@ -18,7 +18,6 @@
  * \ingroup bke
  */
 
-#include <assert.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -395,7 +394,8 @@ static const struct bUnitCollection *bUnitSystems[][B_UNIT_TYPE_TOT] = {
 
 static const bUnitCollection *unit_get_system(int system, int type)
 {
-  assert((system > -1) && (system < UNIT_SYSTEM_TOT) && (type > -1) && (type < B_UNIT_TYPE_TOT));
+  BLI_assert((system > -1) && (system < UNIT_SYSTEM_TOT) && (type > -1) &&
+             (type < B_UNIT_TYPE_TOT));
   return bUnitSystems[system][type]; /* Select system to use: metric/imperial/other? */
 }
 
@@ -815,6 +815,12 @@ static char *find_next_op(const char *str, char *remaining_str, int len_max)
 
       /* Make sure we don't look backwards before the start of the string. */
       if (remaining_str != str && i != 0) {
+        /* Check for velocity or acceleration (e.g. '/' in 'ft/s' is not an op). */
+        if ((remaining_str[i] == '/') && ELEM(remaining_str[i - 1], 't', 'T', 'm', 'M') &&
+            ELEM(remaining_str[i + 1], 's', 'S')) {
+          continue;
+        }
+
         /* Check for scientific notation. */
         if (remaining_str[i - 1] == 'e' || remaining_str[i - 1] == 'E') {
           scientific_notation = true;

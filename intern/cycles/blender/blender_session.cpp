@@ -47,6 +47,7 @@
 
 CCL_NAMESPACE_BEGIN
 
+DeviceTypeMask BlenderSession::device_override = DEVICE_MASK_ALL;
 bool BlenderSession::headless = false;
 int BlenderSession::num_resumable_chunks = 0;
 int BlenderSession::current_resumable_chunk = 0;
@@ -237,6 +238,7 @@ void BlenderSession::reset_session(BL::BlendData &b_data, BL::Depsgraph &b_depsg
    * See note on create_session().
    */
   /* sync object should be re-created */
+  delete sync;
   sync = new BlenderSync(b_engine, b_data, b_scene, scene, !background, session->progress);
 
   BL::SpaceView3D b_null_space_view3d(PointerRNA_NULL);
@@ -562,6 +564,10 @@ void BlenderSession::render(BL::Depsgraph &b_depsgraph_)
     session->reset(buffer_params, effective_layer_samples);
 
     /* render */
+    if (!b_engine.is_preview() && background && print_render_stats) {
+      scene->enable_update_stats();
+    }
+
     session->start();
     session->wait();
 

@@ -164,7 +164,11 @@ enum class ComDebugLevel {
   NORMAL,  // without graphviz output
   FULL     // with graphviz output
 };
+<<<<<<< HEAD
 const ComDebugLevel COM_DEBUG_LEVEL = ComDebugLevel::FULL;
+=======
+const ComDebugLevel COM_DEBUG_LEVEL = ComDebugLevel::NORMAL;
+>>>>>>> upstream/compositor-up
 
 #if COM_CURRENT_THREADING_MODEL == COM_TM_NOTHREAD
 #  if !(defined(DEBUG) || defined(COM_DEBUG))

@@ -39,7 +39,11 @@
 #include "opencl/COM_OpenCLManager.h"
 #include <algorithm>
 
+<<<<<<< HEAD
 ExecutionSystem::ExecutionSystem(const CompositorContext &context)
+=======
+ExecutionSystem::ExecutionSystem(CompositorContext &context)
+>>>>>>> upstream/compositor-up
     : m_bNodeTree(context.getbNodeTree()),
       m_context(context),
       m_operations(),

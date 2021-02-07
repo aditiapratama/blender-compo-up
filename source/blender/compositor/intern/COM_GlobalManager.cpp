@@ -25,6 +25,11 @@ std::unique_ptr<GlobalManager> GlobalMan;
 GlobalManager::GlobalManager()
     : BufferMan(nullptr), ComputeMan(nullptr), CacheMan(nullptr), m_context(nullptr)
 {
+<<<<<<< HEAD
+=======
+  // renderer must be created from program start as it's accessed from node editor
+  m_renderer = new Renderer();
+>>>>>>> upstream/compositor-up
 }
 
 GlobalManager::~GlobalManager()
@@ -38,11 +43,25 @@ GlobalManager::~GlobalManager()
   if (ComputeMan != nullptr) {
     delete ComputeMan;
   }
+<<<<<<< HEAD
 }
 
 void GlobalManager::initialize(const CompositorContext &ctx)
 {
   m_context = &ctx;
+=======
+  if (m_renderer != nullptr) {
+    delete m_renderer;
+  }
+}
+
+void GlobalManager::initialize(CompositorContext &ctx)
+{
+  m_context = &ctx;
+  m_context->initialize();
+  m_renderer->initialize(m_context);
+
+>>>>>>> upstream/compositor-up
   if (CacheMan == nullptr) {
     CacheMan = new CacheManager();
   }
@@ -83,9 +102,19 @@ void GlobalManager::initialize(const CompositorContext &ctx)
   }
 }
 
+<<<<<<< HEAD
 void GlobalManager::deinitialize(const CompositorContext &ctx)
 {
   BufferMan->deinitialize(ctx.isBreaked());
   CacheMan->deinitialize(&ctx);
+=======
+void GlobalManager::deinitialize(CompositorContext &ctx)
+{
+  BLI_assert(&ctx == m_context);
+  BufferMan->deinitialize(ctx.isBreaked());
+  CacheMan->deinitialize(&ctx);
+  m_context->deinitialize();
+  m_renderer->deinitialize();
+>>>>>>> upstream/compositor-up
   m_context = nullptr;
 }

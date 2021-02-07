@@ -46,8 +46,13 @@ class OpenCLDevice : public ComputeDevice {
   int m_compute_units;
   int m_clock_freq;
   int m_global_mem_size;
+<<<<<<< HEAD
   int m_max_img_w;
   int m_max_img_h;
+=======
+  size_t m_max_img_w;
+  size_t m_max_img_h;
+>>>>>>> upstream/compositor-up
   cl_image_format m_supported_formats;
   OneElemImg m_one_elem_imgs[MAX_ONE_ELEM_IMGS];
 

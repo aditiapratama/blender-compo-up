@@ -28,6 +28,7 @@
 #  include "COM_Pixels.h"
 #  include "kernel_util/COM_kernel_types.h"
 
+<<<<<<< HEAD
 /* Extend macros */
 #  define EXTEND_UNCHECKED_I(img, x__, y__) \
     kernel_assert(x__ >= img.start_x && x__ < img.end_x && y__ >= img.start_y && y__ < img.end_y);
@@ -37,17 +38,27 @@
                   y__ < img.end_yf);
 
 #  define EXTEND_CLIP1_I_START(img, dst, x__, y__) \
+=======
+/* SAMPLER PRIVATE IMPLEMENTATION MACROS */
+
+#  define EXTEND_CLIP_I_START(img, dst, x__, y__) \
+>>>>>>> upstream/compositor-up
     if (x__ < img.start_x || x__ >= img.end_x || y__ < img.start_y || y__ >= img.end_y) { \
       dst.x = 0.0f; \
     } \
     else {
 
+<<<<<<< HEAD
 #  define EXTEND_CLIP1_F_START(img, dst, x__, y) \
+=======
+#  define EXTEND_CLIP_F_START(img, dst, x__, y) \
+>>>>>>> upstream/compositor-up
     if (x__ < img.start_xf || x__ >= img.end_xf || y < img.start_yf || y >= img.end_yf) { \
       dst.x = 0.0f; \
     } \
     else {
 
+<<<<<<< HEAD
 #  define EXTEND_CLIP3_I_START(img, dst, x__, y__) \
     if (x__ < img.start_x || x__ >= img.end_x || y__ < img.start_y || y__ >= img.end_y) { \
       dst.x = dst.y = dst.z = 0.0f; \
@@ -122,6 +133,10 @@
 
 /* SAMPLER PRIVATE IMPLEMENTATION MACROS */
 
+=======
+#  define EXTEND_CLIP_END }
+
+>>>>>>> upstream/compositor-up
 #  define SAMPLER_ASSERT__(sampler, interp_mode, extend_mode) \
     kernel_assert(sampler.filter == PixelInterpolation::interp_mode && \
                   sampler.extend == PixelExtend::extend_mode); \
@@ -151,6 +166,7 @@
 
 #  define SAMPLE_NEAREST_CLIP__(ctx_num, src, sampler, dst_pix, coords, type_letter, n_chs) \
     SAMPLER_ASSERT__(sampler, NEAREST, CLIP); \
+<<<<<<< HEAD
     EXTEND_CLIP##n_chs##_##type_letter##_START(src##_img, dst_pix, coords.x, coords.y); \
     NEAREST_WRITE_F##n_chs##__(src##_nearest_##ctx_num, src##_img, coords, dst_pix); \
     EXTEND_CLIP_END;
@@ -162,15 +178,26 @@
 
 /* END OF PRIVATE IMPLEMENTATION MACROS */
 
+=======
+    EXTEND_CLIP_##type_letter##_START(src##_img, dst_pix, coords.x, coords.y); \
+    NEAREST_WRITE_F##n_chs##__(src##_nearest_##ctx_num, src##_img, coords, dst_pix); \
+    EXTEND_CLIP_END;
+
+>>>>>>> upstream/compositor-up
 // u and v will never be negative because we are checking extend before, so we can use
 // casting instead of floor and ceil
 #  define BILINEAR_CLIP__(name, img, sampler, dst_pix, u__, v__, n_chs) \
     SAMPLER_ASSERT__(sampler, BILINEAR, CLIP); \
+<<<<<<< HEAD
     EXTEND_CLIP##n_chs##_F_START(img, dst_pix, u__, v__); \
+=======
+    EXTEND_CLIP_F_START(img, dst_pix, u__, v__); \
+>>>>>>> upstream/compositor-up
     int name##_x1__ = (int)u__; \
     int name##_x2__ = u__ > (float)name##_x1__ ? name##_x1__ + 1 : name##_x1__; \
     int name##_y1__ = (int)v__; \
     int name##_y2__ = v__ > (float)name##_y1__ ? name##_y1__ + 1 : name##_y1__; \
+<<<<<<< HEAD
     EXTEND_CLIP##n_chs##_F_START(img, dst_pix, name##_x2__, name##_y2__);
 
 #  define BILINEAR_MODE__(name, img, sampler, u__, v__, extend_mode) \
@@ -181,6 +208,9 @@
     int name##_y1__ = (int)v__; \
     int name##_y2__ = v__ > (float)name##_y1__ ? name##_y1__ + 1 : name##_y1__; \
     EXTEND_##extend_mode##_F(src##_img, name##_x2__, name##_y2__);
+=======
+    EXTEND_CLIP_F_START(img, dst_pix, name##_x2__, name##_y2__);
+>>>>>>> upstream/compositor-up
 
 #  define BILINEAR_OFFSET__(name, img, u__, v__) \
     float name##_a__ = u__ - name##_x1__; \
@@ -244,6 +274,11 @@
                 name##_ma_b__ * img.buffer[name##_pix2_offset__] + \
                 name##_a_b__ * img.buffer[name##_pix4_offset__];
 
+<<<<<<< HEAD
+=======
+/* END OF PRIVATE IMPLEMENTATION MACROS */
+
+>>>>>>> upstream/compositor-up
 #endif
 
 #endif

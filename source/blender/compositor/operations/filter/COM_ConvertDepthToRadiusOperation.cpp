@@ -107,15 +107,20 @@ ccl_kernel convertDepthToRadiusOp(CCL_WRITE(dst),
   if (z != 0.0f) {
     float iZ = 1.0f / z;
 
-    // bug #6656 part 2b, do not rescale
+    /* bug T6656 part 2b, do not re-scale. */
 #if 0
     bcrad = 0.5f * fabs(aperture * (dof_sp * (cam_invfdist - iZ) - 1.0f));
     // scale crad back to original maximum and blend
     crad->rect[px] = bcrad + wts->rect[px] * (scf * crad->rect[px] - bcrad);
 #endif
     radius = 0.5f * fabsf(aperture * (dof_sp * (inv_focal_distance - iZ) - 1.0f));
+<<<<<<< HEAD:source/blender/compositor/operations/filter/COM_ConvertDepthToRadiusOperation.cpp
     // 'bug' #6615, limit minimum radius to 1 pixel, not really a solution, but somewhat mitigates
     // the problem
+=======
+    /* 'bug' T6615, limit minimum radius to 1 pixel,
+     * not really a solution, but somewhat mitigates the problem. */
+>>>>>>> upstream/compositor-up:source/blender/compositor/operations/COM_ConvertDepthToRadiusOperation.cpp
     if (radius < 0.0f) {
       radius = 0.0f;
     }

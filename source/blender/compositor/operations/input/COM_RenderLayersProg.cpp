@@ -21,6 +21,10 @@
 #include "BLI_listbase.h"
 #include "COM_Buffer.h"
 #include "COM_BufferUtil.h"
+<<<<<<< HEAD
+=======
+#include "COM_CompositorContext.h"
+>>>>>>> upstream/compositor-up
 #include "COM_GlobalManager.h"
 #include "COM_PixelsUtil.h"
 #include "DNA_scene_types.h"
@@ -34,6 +38,11 @@ RenderLayersProg::RenderLayersProg(const char *passName, DataType type, int elem
     : NodeOperation(), m_passName(passName)
 {
   this->setScene(NULL);
+<<<<<<< HEAD
+=======
+  this->setViewLayer(NULL);
+  m_layer_id = 0;
+>>>>>>> upstream/compositor-up
   this->m_inputBuffer = NULL;
   this->m_elementsize = elementsize;
   this->m_rd = NULL;
@@ -43,8 +52,12 @@ RenderLayersProg::RenderLayersProg(const char *passName, DataType type, int elem
 
 void RenderLayersProg::initExecution()
 {
+<<<<<<< HEAD
   Scene *scene = this->getScene();
   Render *re = (scene) ? RE_GetSceneRender(scene) : NULL;
+=======
+  Render *re = GlobalMan->renderer()->getSceneRender(m_scene, m_view_layer);
+>>>>>>> upstream/compositor-up
   RenderResult *rr = NULL;
 
   if (re) {
@@ -52,10 +65,15 @@ void RenderLayersProg::initExecution()
   }
 
   if (rr) {
+<<<<<<< HEAD
     ViewLayer *view_layer = (ViewLayer *)BLI_findlink(&scene->view_layers, getLayerId());
     if (view_layer) {
 
       RenderLayer *rl = RE_GetRenderLayer(rr, view_layer->name);
+=======
+    if (m_view_layer) {
+      RenderLayer *rl = RE_GetRenderLayer(rr, m_view_layer->name);
+>>>>>>> upstream/compositor-up
       if (rl) {
         m_inputBuffer = RE_RenderLayerGetPass(rl, this->m_passName.c_str(), this->m_viewName);
       }
@@ -72,7 +90,11 @@ void RenderLayersProg::hashParams()
 {
   NodeOperation::hashParams();
   hashParam(m_inputBuffer);
+<<<<<<< HEAD
   hashParam(m_layerId);
+=======
+  hashParam(m_layer_id);
+>>>>>>> upstream/compositor-up
   hashParam(std::string(m_passName));
   hashParam(std::string(m_viewName));
 }
@@ -80,6 +102,10 @@ void RenderLayersProg::hashParams()
 void RenderLayersProg::deinitExecution()
 {
   this->m_inputBuffer = NULL;
+<<<<<<< HEAD
+=======
+  NodeOperation::deinitExecution();
+>>>>>>> upstream/compositor-up
 }
 
 TmpBuffer *RenderLayersProg::getCustomBuffer()
@@ -103,8 +129,12 @@ ResolutionType RenderLayersProg::determineResolution(int resolution[2],
                                                      int /*preferredResolution*/[2],
                                                      bool /*setResolution*/)
 {
+<<<<<<< HEAD
   Scene *sce = this->getScene();
   Render *re = (sce) ? RE_GetSceneRender(sce) : NULL;
+=======
+  Render *re = GlobalMan->renderer()->getSceneRender(m_scene, m_view_layer);
+>>>>>>> upstream/compositor-up
   RenderResult *rr = NULL;
 
   resolution[0] = 0;
@@ -115,9 +145,15 @@ ResolutionType RenderLayersProg::determineResolution(int resolution[2],
   }
 
   if (rr) {
+<<<<<<< HEAD
     ViewLayer *view_layer = (ViewLayer *)BLI_findlink(&sce->view_layers, getLayerId());
     if (view_layer) {
       RenderLayer *rl = RE_GetRenderLayer(rr, view_layer->name);
+=======
+
+    if (m_view_layer) {
+      RenderLayer *rl = RE_GetRenderLayer(rr, m_view_layer->name);
+>>>>>>> upstream/compositor-up
       if (rl) {
         resolution[0] = rl->rectx;
         resolution[1] = rl->recty;

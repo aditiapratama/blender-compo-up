@@ -54,15 +54,15 @@
 
 #include "BKE_anim_visualization.h"
 #include "BKE_image.h"
-#include "BKE_main.h"  // for Main
-#include "BKE_mesh.h"  // for ME_ defines (patching)
+#include "BKE_main.h" /* for Main */
+#include "BKE_mesh.h" /* for ME_ defines (patching) */
 #include "BKE_modifier.h"
 #include "BKE_particle.h"
 #include "BKE_pointcache.h"
 #include "BKE_scene.h"
 #include "BKE_screen.h"
 #include "BKE_sequencer.h"
-#include "BKE_text.h"  // for txt_extended_ascii_as_utf8
+#include "BKE_text.h" /* for txt_extended_ascii_as_utf8 */
 #include "BKE_texture.h"
 #include "BKE_tracking.h"
 
@@ -70,7 +70,7 @@
 #  include "BKE_writeffmpeg.h"
 #endif
 
-#include "IMB_imbuf.h"  // for proxy / timecode versioning stuff
+#include "IMB_imbuf.h" /* for proxy / timecode versioning stuff */
 
 #include "NOD_common.h"
 #include "NOD_texture.h"
@@ -700,7 +700,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (bmain->versionfile < 260 || (bmain->versionfile == 260 && bmain->subversionfile < 1)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 260, 1)) {
     Object *ob;
 
     for (ob = bmain->objects.first; ob; ob = ob->id.next) {
@@ -721,7 +721,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (bmain->versionfile < 260 || (bmain->versionfile == 260 && bmain->subversionfile < 2)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 260, 2)) {
     FOREACH_NODETREE_BEGIN (bmain, ntree, id) {
       if (ntree->type == NTREE_SHADER) {
         bNode *node;
@@ -740,7 +740,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     FOREACH_NODETREE_END;
   }
 
-  if (bmain->versionfile < 260 || (bmain->versionfile == 260 && bmain->subversionfile < 4)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 260, 4)) {
     {
       /* Convert node angles to radians! */
       Scene *sce;
@@ -830,7 +830,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (bmain->versionfile < 260 || (bmain->versionfile == 260 && bmain->subversionfile < 6)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 260, 6)) {
     Scene *sce;
     MovieClip *clip;
 
@@ -880,7 +880,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (bmain->versionfile < 260 || (bmain->versionfile == 260 && bmain->subversionfile < 8)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 260, 8)) {
     Brush *brush;
 
     for (brush = bmain->brushes.first; brush; brush = brush->id.next) {
@@ -890,7 +890,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (bmain->versionfile < 261 || (bmain->versionfile == 261 && bmain->subversionfile < 1)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 261, 1)) {
     {
       /* update use flags for node sockets (was only temporary before) */
       Scene *sce;
@@ -975,7 +975,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (bmain->versionfile < 261 || (bmain->versionfile == 261 && bmain->subversionfile < 2)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 261, 2)) {
     {
       /* convert deprecated sculpt_paint_unified_* fields to
        * UnifiedPaintSettings */
@@ -991,7 +991,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (bmain->versionfile < 261 || (bmain->versionfile == 261 && bmain->subversionfile < 3)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 261, 3)) {
     {
       /* convert extended ascii to utf-8 for text editor */
       Text *text;
@@ -1068,7 +1068,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (bmain->versionfile < 262 || (bmain->versionfile == 262 && bmain->subversionfile < 1)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 262, 1)) {
     /* update use flags for node sockets (was only temporary before) */
     Scene *sce;
     bNodeTree *ntree;
@@ -1095,7 +1095,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (bmain->versionfile < 262 || (bmain->versionfile == 262 && bmain->subversionfile < 2)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 262, 2)) {
     /* Set new idname of keyingsets from their now "label-only" name. */
     Scene *scene;
     for (scene = bmain->scenes.first; scene; scene = scene->id.next) {
@@ -1108,7 +1108,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (bmain->versionfile < 262 || (bmain->versionfile == 262 && bmain->subversionfile < 3)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 262, 3)) {
     Object *ob;
     ModifierData *md;
 
@@ -1122,7 +1122,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (bmain->versionfile < 262 || (bmain->versionfile == 262 && bmain->subversionfile < 4)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 262, 4)) {
     /* Read Viscosity presets from older files */
     Object *ob;
 
@@ -1152,7 +1152,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (bmain->versionfile < 263 || (bmain->versionfile == 263 && bmain->subversionfile < 1)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 263, 1)) {
     /* file output node paths are now stored in the file info struct instead socket name */
     Scene *sce;
     bNodeTree *ntree;
@@ -1167,7 +1167,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (bmain->versionfile < 263 || (bmain->versionfile == 263 && bmain->subversionfile < 3)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 263, 3)) {
     Scene *scene;
     Brush *brush;
 
@@ -1188,7 +1188,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (bmain->versionfile < 263 || (bmain->versionfile == 263 && bmain->subversionfile < 2)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 263, 2)) {
     bScreen *screen;
 
     for (screen = bmain->screens.first; screen; screen = screen->id.next) {
@@ -1223,7 +1223,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (bmain->versionfile < 263 || (bmain->versionfile == 263 && bmain->subversionfile < 4)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 263, 4)) {
     Camera *cam;
     Curve *cu;
 
@@ -1242,7 +1242,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (bmain->versionfile < 263 || (bmain->versionfile == 263 && bmain->subversionfile < 5)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 263, 5)) {
     {
       /* file output node paths are now stored in the file info struct instead socket name */
       Scene *sce;
@@ -1261,7 +1261,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (bmain->versionfile < 263 || (bmain->versionfile == 263 && bmain->subversionfile < 6)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 263, 6)) {
     /* update use flags for node sockets (was only temporary before) */
     Scene *sce;
     Material *mat;
@@ -1304,7 +1304,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (bmain->versionfile < 263 || (bmain->versionfile == 263 && bmain->subversionfile < 7)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 263, 7)) {
     Object *ob;
 
     for (ob = bmain->objects.first; ob; ob = ob->id.next) {
@@ -1322,7 +1322,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (bmain->versionfile < 263 || (bmain->versionfile == 263 && bmain->subversionfile < 9)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 263, 9)) {
     FOREACH_NODETREE_BEGIN (bmain, ntree, id) {
       if (ntree->type == NTREE_SHADER) {
         bNode *node;
@@ -1340,7 +1340,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     FOREACH_NODETREE_END;
   }
 
-  if (bmain->versionfile < 263 || (bmain->versionfile == 263 && bmain->subversionfile < 10)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 263, 10)) {
     {
       FOREACH_NODETREE_BEGIN (bmain, ntree, id) {
         if (ntree->type == NTREE_COMPOSIT) {
@@ -1389,7 +1389,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (bmain->versionfile < 263 || (bmain->versionfile == 263 && bmain->subversionfile < 11)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 263, 11)) {
     MovieClip *clip;
 
     for (clip = bmain->movieclips.first; clip; clip = clip->id.next) {
@@ -1404,7 +1404,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (bmain->versionfile < 263 || (bmain->versionfile == 263 && bmain->subversionfile < 13)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 263, 13)) {
     FOREACH_NODETREE_BEGIN (bmain, ntree, id) {
       if (ntree->type == NTREE_COMPOSIT) {
         bNode *node;
@@ -1422,7 +1422,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     FOREACH_NODETREE_END;
   }
 
-  if (bmain->versionfile < 263 || (bmain->versionfile == 263 && bmain->subversionfile < 14)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 263, 14)) {
     ParticleSettings *part;
 
     FOREACH_NODETREE_BEGIN (bmain, ntree, id) {
@@ -1451,7 +1451,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (bmain->versionfile < 263 || (bmain->versionfile == 263 && bmain->subversionfile < 17)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 263, 17)) {
     FOREACH_NODETREE_BEGIN (bmain, ntree, id) {
       if (ntree->type == NTREE_COMPOSIT) {
         bNode *node;
@@ -1472,7 +1472,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     FOREACH_NODETREE_END;
   }
 
-  if (bmain->versionfile < 263 || (bmain->versionfile == 263 && bmain->subversionfile < 18)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 263, 18)) {
     Scene *scene;
 
     for (scene = bmain->scenes.first; scene; scene = scene->id.next) {
@@ -1508,7 +1508,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
   }
 
   /* color management pipeline changes compatibility code */
-  if (bmain->versionfile < 263 || (bmain->versionfile == 263 && bmain->subversionfile < 19)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 263, 19)) {
     Scene *scene;
     Image *ima;
     bool colormanagement_disabled = false;
@@ -1546,14 +1546,14 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (bmain->versionfile < 263 || (bmain->versionfile == 263 && bmain->subversionfile < 20)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 263, 20)) {
     Key *key;
     for (key = bmain->shapekeys.first; key; key = key->id.next) {
       blo_do_versions_key_uidgen(key);
     }
   }
 
-  if (bmain->versionfile < 263 || (bmain->versionfile == 263 && bmain->subversionfile < 21)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 263, 21)) {
     {
       Mesh *me;
       for (me = bmain->meshes.first; me; me = me->id.next) {
@@ -1565,7 +1565,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
 
   /* correction for files saved in blender version when BKE_pose_copy_data
    * didn't copy animation visualization, which lead to deadlocks on motion
-   * path calculation for proxied armatures, see [#32742]
+   * path calculation for proxied armatures, see T32742.
    */
   if (bmain->versionfile < 264) {
     Object *ob;
@@ -1579,7 +1579,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (bmain->versionfile < 264 || (bmain->versionfile == 264 && bmain->subversionfile < 1)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 264, 1)) {
     FOREACH_NODETREE_BEGIN (bmain, ntree, id) {
       if (ntree->type == NTREE_SHADER) {
         bNode *node;
@@ -1593,7 +1593,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     FOREACH_NODETREE_END;
   }
 
-  if (bmain->versionfile < 264 || (bmain->versionfile == 264 && bmain->subversionfile < 2)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 264, 2)) {
     MovieClip *clip;
 
     for (clip = bmain->movieclips.first; clip; clip = clip->id.next) {
@@ -1610,7 +1610,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (bmain->versionfile < 264 || (bmain->versionfile == 264 && bmain->subversionfile < 3)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 264, 3)) {
     /* smoke branch */
     {
       Object *ob;
@@ -1673,7 +1673,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (bmain->versionfile < 264 || (bmain->versionfile == 264 && bmain->subversionfile < 5)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 264, 5)) {
     /* set a unwrapping margin and ABF by default */
     Scene *scene;
 
@@ -1685,8 +1685,8 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (bmain->versionfile < 264 || (bmain->versionfile == 264 && bmain->subversionfile < 6)) {
-    /* Fix for bug #32982, internal_links list could get corrupted from r51630 onward.
+  if (!MAIN_VERSION_ATLEAST(bmain, 264, 6)) {
+    /* Fix for bug T32982, internal_links list could get corrupted from r51630 onward.
      * Simply remove bad internal_links lists to avoid NULL pointers.
      */
     FOREACH_NODETREE_BEGIN (bmain, ntree, id) {
@@ -1705,7 +1705,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     FOREACH_NODETREE_END;
   }
 
-  if (bmain->versionfile < 264 || (bmain->versionfile == 264 && bmain->subversionfile < 7)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 264, 7)) {
     /* convert tiles size from resolution and number of tiles */
     {
       Scene *scene;
@@ -1729,7 +1729,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (bmain->versionfile < 264 || (bmain->versionfile == 264 && bmain->subversionfile < 7)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 264, 7)) {
     MovieClip *clip;
 
     for (clip = bmain->movieclips.first; clip; clip = clip->id.next) {
@@ -1748,7 +1748,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (bmain->versionfile < 265 || (bmain->versionfile == 265 && bmain->subversionfile < 3)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 265, 3)) {
     bScreen *screen;
     for (screen = bmain->screens.first; screen; screen = screen->id.next) {
       ScrArea *area;
@@ -1787,7 +1787,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (bmain->versionfile < 265 || (bmain->versionfile == 265 && bmain->subversionfile < 5)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 265, 5)) {
     Scene *scene;
     Tex *tex;
 
@@ -1848,7 +1848,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
     FOREACH_NODETREE_END;
   }
-  else if (bmain->versionfile < 266 || (bmain->versionfile == 266 && bmain->subversionfile < 1)) {
+  else if (!MAIN_VERSION_ATLEAST(bmain, 266, 1)) {
     /* texture use alpha was removed for 2.66 but added back again for 2.66a,
      * for compatibility all textures assumed it to be enabled */
     Tex *tex;
@@ -1860,7 +1860,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (bmain->versionfile < 265 || (bmain->versionfile == 265 && bmain->subversionfile < 7)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 265, 7)) {
     Curve *cu;
 
     for (cu = bmain->curves.first; cu; cu = cu->id.next) {
@@ -1895,14 +1895,14 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (MAIN_VERSION_OLDER(bmain, 265, 9)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 265, 9)) {
     Mesh *me;
     for (me = bmain->meshes.first; me; me = me->id.next) {
       BKE_mesh_do_versions_cd_flag_init(me);
     }
   }
 
-  if (MAIN_VERSION_OLDER(bmain, 265, 10)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 265, 10)) {
     Brush *br;
     for (br = bmain->brushes.first; br; br = br->id.next) {
       if (br->ob_mode & OB_MODE_TEXTURE_PAINT) {
@@ -1911,8 +1911,8 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  // add storage for compositor translate nodes when not existing
-  if (MAIN_VERSION_OLDER(bmain, 265, 11)) {
+  /* add storage for compositor translate nodes when not existing */
+  if (!MAIN_VERSION_ATLEAST(bmain, 265, 11)) {
     FOREACH_NODETREE_BEGIN (bmain, ntree, id) {
       if (ntree->type == NTREE_COMPOSIT) {
         bNode *node;
@@ -1926,14 +1926,14 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     FOREACH_NODETREE_END;
   }
 
-  if (MAIN_VERSION_OLDER(bmain, 266, 2)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 266, 2)) {
     FOREACH_NODETREE_BEGIN (bmain, ntree, id) {
       do_versions_nodetree_customnodes(ntree, ((ID *)ntree == id));
     }
     FOREACH_NODETREE_END;
   }
 
-  if (MAIN_VERSION_OLDER(bmain, 266, 2)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 266, 2)) {
     bScreen *screen;
     for (screen = bmain->screens.first; screen; screen = screen->id.next) {
       ScrArea *area;
@@ -1967,7 +1967,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (MAIN_VERSION_OLDER(bmain, 266, 3)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 266, 3)) {
     {
       /* Fix for a very old issue:
        * Node names were nominally made unique in r24478 (2.50.8), but the do_versions check
@@ -2142,7 +2142,7 @@ void blo_do_versions_260(FileData *fd, Library *UNUSED(lib), Main *bmain)
     }
   }
 
-  if (MAIN_VERSION_OLDER(bmain, 267, 1)) {
+  if (!MAIN_VERSION_ATLEAST(bmain, 267, 1)) {
     Object *ob;
 
     for (ob = bmain->objects.first; ob; ob = ob->id.next) {

@@ -19,9 +19,11 @@
 #pragma once
 
 #include "BLI_listbase.h"
-#include "COM_NodeOperation.h"
 #include "DNA_movieclip_types.h"
 #include "IMB_imbuf_types.h"
+#include <mutex>
+
+#include "COM_NodeOperation.h"
 
 /**
  * Base class for movie clip
@@ -68,6 +70,11 @@ class MovieClipBaseOperation : public NodeOperation {
 class MovieClipOperation : public MovieClipBaseOperation {
  public:
   MovieClipOperation();
+<<<<<<< HEAD:source/blender/compositor/operations/input/COM_MovieClipOperation.h
+=======
+  std::mutex m_mutex;
+  int m_n_written_rects;
+>>>>>>> upstream/compositor-up:source/blender/compositor/operations/COM_MovieClipOperation.h
 
  protected:
   void execPixels(ExecutionManager &man) override;

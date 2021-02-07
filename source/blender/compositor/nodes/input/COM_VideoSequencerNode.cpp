@@ -25,8 +25,12 @@ VideoSequencerNode::VideoSequencerNode(bNode *editorNode) : Node(editorNode)
   /* pass */
 }
 
+<<<<<<< HEAD
 void VideoSequencerNode::convertToOperations(NodeConverter &converter,
                                              const CompositorContext &) const
+=======
+void VideoSequencerNode::convertToOperations(NodeConverter &converter, CompositorContext &) const
+>>>>>>> upstream/compositor-up
 {
   bNode *editorNode = this->getbNode();
   VideoSequencerOperation *operation = new VideoSequencerOperation();

@@ -30,7 +30,10 @@
 #include "COM_NodeOperation.h"
 #include "COM_NodeSocketReader.h" /* own include */
 #include "COM_PixelsUtil.h"
+<<<<<<< HEAD
 #include "COM_TranslateOperation.h"
+=======
+>>>>>>> upstream/compositor-up
 
 using namespace std::placeholders;
 /*******************
@@ -116,6 +119,11 @@ ResolutionType NodeSocketReader::determineResolution(int resolution[2],
                                                      int preferredResolution[2],
                                                      bool setResolution)
 {
+<<<<<<< HEAD
+=======
+  resolution[0] = 0;
+  resolution[1] = 0;
+>>>>>>> upstream/compositor-up
   /* Look for a valid resolution of any input. First looking at the main input socket. This doesn't
    * set resolution on inputs yet */
   int total_inputs = m_inputs.size();

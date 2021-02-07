@@ -18,8 +18,12 @@
 
 #include <cstring>
 
+<<<<<<< HEAD:source/blender/compositor/nodes/input/COM_TextureNode.cpp
 #include "COM_TextureNode.h"
+=======
+>>>>>>> upstream/compositor-up:source/blender/compositor/nodes/COM_TextureNode.cpp
 #include "COM_ExecutionSystem.h"
+#include "COM_TextureNode.h"
 #include "COM_TextureOperation.h"
 
 TextureNode::TextureNode(bNode *editorNode) : Node(editorNode)
@@ -27,8 +31,7 @@ TextureNode::TextureNode(bNode *editorNode) : Node(editorNode)
   /* pass */
 }
 
-void TextureNode::convertToOperations(NodeConverter &converter,
-                                      const CompositorContext &context) const
+void TextureNode::convertToOperations(NodeConverter &converter, CompositorContext &context) const
 {
   bNode *editorNode = this->getbNode();
   Tex *texture = (Tex *)editorNode->id;

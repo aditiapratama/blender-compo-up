@@ -16,7 +16,16 @@
  * Copyright 2011, Blender Foundation.
  */
 
+#include "BKE_context.h"
+#include "BKE_global.h"
+#include "BKE_main.h"
+#include "BKE_scene.h"
+#include "BLI_assert.h"
+#include "DNA_userdef_types.h"
+#include <stdio.h>
+
 #include "COM_CompositorContext.h"
+<<<<<<< HEAD
 #include "BKE_context.h"
 #include "BKE_global.h"
 #include "BKE_main.h"
@@ -26,14 +35,25 @@
 #include "COM_defines.h"
 #include "DNA_userdef_types.h"
 #include <stdio.h>
+=======
+#include "COM_ComputeDevice.h"
+#include "COM_GlobalManager.h"
+#include "COM_defines.h"
+>>>>>>> upstream/compositor-up
 
+const int MAX_IMG_DIM_SIZE = 16000;
 CompositorContext::CompositorContext()
 {
+<<<<<<< HEAD
   m_scene = nullptr;
   m_rd = nullptr;
   m_quality = CompositorQuality::HIGH;
   m_viewSettings = nullptr;
   m_displaySettings = nullptr;
+=======
+  m_exec_data = nullptr;
+  m_quality = CompositorQuality::HIGH;
+>>>>>>> upstream/compositor-up
   m_cpu_work_threads = 0;
   m_previews = nullptr;
   m_inputs_scale = 0.2f;
@@ -41,6 +61,7 @@ CompositorContext::CompositorContext()
   m_max_disk_cache_bytes = 0;
   m_use_disk_cache = false;
   m_disk_cache_dir = "";
+<<<<<<< HEAD
   m_bnodetree = nullptr;
   m_rendering = false;
   m_viewName = nullptr;
@@ -143,10 +164,121 @@ int CompositorContext::getPreviewSize() const
 }
 
 int CompositorContext::getCurrentFrame() const
+=======
+}
+
+void CompositorContext::initialize()
 {
-  if (this->m_rd) {
-    return this->m_rd->cfra;
+}
+
+void CompositorContext::deinitialize()
+>>>>>>> upstream/compositor-up
+{
+}
+
+CompositorContext CompositorContext::build(const std::string &execution_id,
+                                           CompositTreeExec *exec_data)
+{
+
+  CompositorContext context;
+  context.m_exec_data = exec_data;
+
+  auto rd = exec_data->rd;
+  /* Make sure node tree has previews.
+   * Don't create previews in advance, this is done when adding preview operations.
+   * Reserved preview size is determined by render output for now.
+   *
+   * We fit the aspect into COM_PREVIEW_SIZE x COM_PREVIEW_SIZE image to avoid
+   * insane preview resolution, which might even overflow preview dimensions.
+   */
+  const float aspect = rd->xsch > 0 ? (float)rd->ysch / (float)rd->xsch : 1.0f;
+  int preview_size = context.getPreviewSize();
+  int preview_width, preview_height;
+  if (aspect < 1.0f) {
+    preview_width = preview_size;
+    preview_height = (int)(preview_size * aspect);
   }
+  else {
+    preview_width = (int)(preview_size / aspect);
+    preview_height = preview_size;
+  }
+  BKE_node_preview_init_tree(exec_data->ntree, preview_width, preview_height, false);
+
+  context.m_execution_id = execution_id;
+  context.m_previews = exec_data->ntree->previews;
+
+  /* initialize the CompositorContext */
+  if (exec_data->rendering) {
+    context.m_quality = static_cast<CompositorQuality>(exec_data->ntree->render_quality);
+  }
+  else {
+    context.m_quality = static_cast<CompositorQuality>(exec_data->ntree->edit_quality);
+  }
+<<<<<<< HEAD
+=======
+
+  context.m_max_mem_cache_bytes = (size_t)U.compositor_mem_cache_limit * 1024 * 1024;  // MB
+  context.m_max_disk_cache_bytes = (size_t)U.compositor_disk_cache_limit * 1024 * 1024 *
+                                   1024;  // GB
+  context.m_disk_cache_dir = U.compositor_disk_cache_dir[0] == '\0' ? U.tempdir :
+                                                                      U.compositor_disk_cache_dir;
+  context.m_use_disk_cache = U.compositor_flag &
+                             eUserpref_Compositor_Flag::USER_COMPOSITOR_DISK_CACHE_ENABLE;
+
+  return context;
+}
+
+int CompositorContext::getMaxImgW() const
+{
+  if (GlobalMan->ComputeMan->canCompute()) {
+    return GlobalMan->ComputeMan->getSelectedDevice()->getMaxImgW();
+  }
+  else {
+    return MAX_IMG_DIM_SIZE;
+  }
+}
+int CompositorContext::getMaxImgH() const
+{
+  if (GlobalMan->ComputeMan->canCompute()) {
+    return GlobalMan->ComputeMan->getSelectedDevice()->getMaxImgH();
+  }
+  else {
+    return MAX_IMG_DIM_SIZE;
+  }
+}
+bool CompositorContext::isBreaked() const
+{
+  return m_exec_data->ntree->test_break && m_exec_data->ntree->test_break(m_exec_data->ntree->tbh);
+}
+
+void CompositorContext::updateDraw() const
+{
+  if (m_exec_data->ntree->update_draw) {
+    m_exec_data->ntree->update_draw(this->m_exec_data->ntree->udh);
+  }
+}
+
+int CompositorContext::getPreviewSize() const
+{
+  switch (m_exec_data->ntree->preview_size) {
+    case NTREE_PREVIEW_SIZE_SMALL:
+      return 150;
+    case NTREE_PREVIEW_SIZE_MEDIUM:
+      return 300;
+    case NTREE_PREVIEW_SIZE_BIG:
+      return 450;
+    default:
+      BLI_assert(!"Non implemented preview size");
+      return 0;
+  }
+}
+
+int CompositorContext::getCurrentFrame() const
+{
+  if (m_exec_data->rd) {
+    return m_exec_data->rd->cfra;
+  }
+>>>>>>> upstream/compositor-up
   else {
     BLI_assert(!"Unavailable frame number");
     return -1; /* this should never happen */

@@ -73,15 +73,22 @@
 #    define TYPEOF(x) __typeof__(x)
 #endif
 
+<<<<<<< HEAD
 #undef CHECK_TYPE
 #undef CHECK_TYPE_PAIR
 #undef CHECK_TYPE_INLINE
 
+=======
+>>>>>>> upstream/compositor-up
 /* Causes warning:
  * incompatible types when assigning to type 'Foo' from type 'Bar'
  * ... the compiler optimizes away the temp var */
 #if defined(__GNUC__) && !defined(__KERNEL_COMPUTE__)
+<<<<<<< HEAD
 #  define CHECK_TYPE(var, type) \
+=======
+#  define CCL_CHECK_TYPE(var, type) \
+>>>>>>> upstream/compositor-up
     { \
       TYPEOF(var) * __tmp; \
       __tmp = (type *)NULL; \
@@ -89,7 +96,11 @@
     } \
     (void)0
 
+<<<<<<< HEAD
 #  define CHECK_TYPE_PAIR(var_a, var_b) \
+=======
+#  define CCL_CHECK_TYPE_PAIR(var_a, var_b) \
+>>>>>>> upstream/compositor-up
     { \
       TYPEOF(var_a) * __tmp; \
       __tmp = (__typeof__(var_b) *)NULL; \
@@ -97,12 +108,18 @@
     } \
     (void)0
 #else
+<<<<<<< HEAD
 #  define CHECK_TYPE(var, type)
 #  define CHECK_TYPE_PAIR(var_a, var_b)
+=======
+#  define CCL_CHECK_TYPE(var, type)
+#  define CCL_CHECK_TYPE_PAIR(var_a, var_b)
+>>>>>>> upstream/compositor-up
 #endif
 
 /* can be used in simple macros */
 #if !defined(__KERNEL_COMPUTE__)
+<<<<<<< HEAD
 #define CHECK_TYPE_INLINE(val, type) ((void)(((type)0) != (val)))
 #else
 #  define CHECK_TYPE_INLINE(val, type)
@@ -114,6 +131,18 @@
     type sw_ap; \
     CHECK_TYPE(a, type); \
     CHECK_TYPE(b, type); \
+=======
+#define CCL_CHECK_TYPE_INLINE(val, type) ((void)(((type)0) != (val)))
+#else
+#  define CCL_CHECK_TYPE_INLINE(val, type)
+#endif
+
+#define CCL_SWAP(type, a, b) \
+  { \
+    type sw_ap; \
+    CCL_CHECK_TYPE(a, type); \
+    CCL_CHECK_TYPE(b, type); \
+>>>>>>> upstream/compositor-up
     sw_ap = (a); \
     (a) = (b); \
     (b) = sw_ap; \
