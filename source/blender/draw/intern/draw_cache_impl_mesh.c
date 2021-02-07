@@ -51,6 +51,8 @@
 #include "BKE_mesh_tangent.h"
 #include "BKE_modifier.h"
 #include "BKE_object_deform.h"
+#include "BKE_paint.h"
+#include "BKE_pbvh.h"
 
 #include "atomic_ops.h"
 
@@ -1201,7 +1203,12 @@ void DRW_mesh_batch_cache_create_requested(struct TaskGraph *task_graph,
    * In this case the custom-data layers used wont always match in `me->runtime.batch_cache`.
    * If we want to display regular mesh data, we should have a separate cache for the edit-mesh.
    * See T77359. */
-  const bool is_editmode = (me->edit_mesh != NULL) /* && DRW_object_is_in_edit_mode(ob) */;
+  const bool is_editmode = (me->edit_mesh != NULL) &&
+                           /* In rare cases we have the edit-mode data but not the generated cache.
+                            * This can happen when switching an objects data to a mesh which
+                            * happens to be in edit-mode in another scene, see: T82952. */
+                           (me->edit_mesh->mesh_eval_final !=
+                            NULL) /* && DRW_object_is_in_edit_mode(ob) */;
 
   /* This could be set for paint mode too, currently it's only used for edit-mode. */
   const bool is_mode_active = is_editmode && DRW_object_is_in_edit_mode(ob);
@@ -1308,6 +1315,17 @@ void DRW_mesh_batch_cache_create_requested(struct TaskGraph *task_graph,
     drw_mesh_batch_cache_check_available(task_graph, me);
 #endif
     return;
+  }
+
+  /* TODO(pablodp606): This always updates the sculpt normals for regular drawing (non-PBVH).
+   * This makes tools that sample the surface per step get wrong normals until a redraw happens.
+   * Normal updates should be part of the brush loop and only run during the stroke when the
+   * brush needs to sample the surface. The drawing code should only update the normals
+   * per redraw when smooth shading is enabled. */
+  const bool do_update_sculpt_normals = ob->sculpt && ob->sculpt->pbvh;
+  if (do_update_sculpt_normals) {
+    Mesh *mesh = ob->data;
+    BKE_pbvh_update_normals(ob->sculpt->pbvh, mesh->runtime.subdiv_ccg);
   }
 
   cache->batch_ready |= batch_requested;
